@@ -136,6 +136,9 @@ dmypy.json
 # Git mergetool backup
 *.orig
 
+# Shutdown/Resume signal file
+.shutdown_signal
+
 # Simulated display capture
 screencap.png
 tmp

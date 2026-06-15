@@ -280,7 +280,7 @@ if __name__ == "__main__":
                                            0,
                                            hinst,
                                            None)
-            while True:
+            while not os.path.exists('.shutdown_signal'):
                 # Receive and dispatch window messages
                 win32gui.PumpWaitingMessages()
                 time.sleep(0.5)
