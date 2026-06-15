@@ -191,15 +191,60 @@ class Cpu(sensors.Cpu):
         return math.nan
 
 
-class Gpu(python_sensors.Gpu if python_sensors else sensors.Gpu):
-    pass
+_RTSS_MEMORY_MAP_NAME = "RTSSSharedMemoryV2"
+_RTSS_FPS_FRAME_INDEX = 0x1F4
+_RTSS_FPS_FRAME_TIME_INDEX = 0x1F5
+
+_RTSS_BUFFER_ENTRY_STRIDE = 0x400
+_RTSS_ENTRY_FRAMERATE = 8
+
+_rtss_available = False
 
 
-if python_sensors:
+def _check_rtss():
+    global _rtss_available
     try:
-        python_sensors.Gpu.is_available()
+        import mmap
+        size = 4 + 4 + 4 + 4
+        mmap.mmap(-1, size, _RTSS_MEMORY_MAP_NAME).close()
+        _rtss_available = True
     except:
-        pass
+        _rtss_available = False
+
+
+_check_rtss()
+
+
+def _read_rtss_fps() -> float:
+    if not _rtss_available:
+        return math.nan
+    try:
+        import mmap
+        size = 0x10000
+        m = mmap.mmap(-1, size, _RTSS_MEMORY_MAP_NAME)
+        entries = struct.unpack_from('<I', m, 0x3C)[0]
+        for i in range(entries):
+            off = 0x400 + i * _RTSS_BUFFER_ENTRY_STRIDE
+            eid = struct.unpack_from('<I', m, off + 8)[0]
+            if eid == _RTSS_ENTRY_FRAMERATE:
+                fps = struct.unpack_from('<d', m, off + 0x18)[0]
+                m.close()
+                if 0 < fps < 999:
+                    return round(fps, 1)
+                return math.nan
+        m.close()
+        return math.nan
+    except:
+        return math.nan
+
+
+class Gpu(python_sensors.Gpu if python_sensors else sensors.Gpu):
+    @staticmethod
+    def fps() -> float:
+        fps = _read_rtss_fps()
+        if not math.isnan(fps):
+            return fps
+        return math.nan
 
 
 class Memory(python_sensors.Memory if python_sensors else sensors.Memory):
