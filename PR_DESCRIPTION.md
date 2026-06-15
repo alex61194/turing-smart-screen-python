@@ -1,8 +1,8 @@
-## LHM + RTSS FPS sensor & suspend/resume support
+## RTSS FPS sensor & suspend/resume support
 
-### 1. RTSS FPS support via new `HW_SENSORS: HWINFO` backend
+### 1. RTSS FPS support via new `HW_SENSORS: RTSS` backend
 
-Adds a new sensor backend that reads in-game FPS from **RTSS (RivaTuner Statistics Server) shared memory** (`RTSSSharedMemoryV2`), while using **LibreHardwareMonitor WMI** for all other hardware readings (CPU, GPU temps/freqs, etc.).
+Adds a new sensor backend (`sensors_rtss.py`) that reads in-game FPS from **RTSS (RivaTuner Statistics Server) shared memory** (`RTSSSharedMemoryV2`), while using **LibreHardwareMonitor WMI** for all other hardware readings (CPU, GPU temps/freqs, etc.).
 
 **Why RTSS:** RTSS hooks into any DirectX/OpenGL/Vulkan game and reports real-time framerate regardless of GPU vendor (NVIDIA, AMD, Intel). The existing LHM FPS reading via `Hardware.SensorType.Factor` is unreliable — it depends on the GPU model and driver.
 
@@ -13,7 +13,7 @@ Adds a new sensor backend that reads in-game FPS from **RTSS (RivaTuner Statisti
 
 **New config option in `config.yaml`:**
 ```yaml
-# - HWINFO  use LHM WMI for hardware sensors + RTSS for GPU FPS (Windows only)
+# - RTSS  use LHM WMI for hardware sensors + RTSS for GPU FPS (Windows only)
 ```
 
 ### 2. Suspend/Resume & Graceful Shutdown (`power_handler.py`)

@@ -68,11 +68,11 @@ elif HW_SENSORS == "STUB":
 elif HW_SENSORS == "STATIC":
     logger.warning("Stub sensors, not real HW sensors")
     import library.sensors.sensors_stub_static as sensors
-elif HW_SENSORS == "HWINFO":
+elif HW_SENSORS == "RTSS":
     if platform.system() == 'Windows':
-        import library.sensors.sensors_hwinfo as sensors
+        import library.sensors.sensors_rtss as sensors
     else:
-        logger.error("HWiNFO integration is only available on Windows")
+        logger.error("RTSS integration is only available on Windows")
         try:
             sys.exit(0)
         except:
