@@ -1,19 +1,19 @@
-## HWiNFO sensor integration & suspend/resume support
+## LHM + RTSS FPS sensor & suspend/resume support
 
-### 1. HWiNFO + RTSS Hybrid Sensor (`HW_SENSORS: HWINFO`)
+### 1. RTSS FPS support via new `HW_SENSORS: HWINFO` backend
 
-Adds a new sensor backend that reads hardware data from **HWiNFO's shared memory** and **in-game FPS from RTSS (RivaTuner Statistics Server) shared memory**.
+Adds a new sensor backend that reads in-game FPS from **RTSS (RivaTuner Statistics Server) shared memory** (`RTSSSharedMemoryV2`), while using **LibreHardwareMonitor WMI** for all other hardware readings (CPU, GPU temps/freqs, etc.).
 
-**CPU readings** come from HWiNFO shared memory (`Global\HWiNFO_SENS_SM2`), with fallback chain:
-1. HWiNFO shared memory (per-P-core/E-core clocks on hybrid CPUs)
-2. LibreHardwareMonitor WMI (`root\LibreHardwareMonitor`)
-3. Python libraries (psutil)
+**Why RTSS:** RTSS hooks into any DirectX/OpenGL/Vulkan game and reports real-time framerate regardless of GPU vendor (NVIDIA, AMD, Intel). The existing LHM FPS reading via `Hardware.SensorType.Factor` is unreliable — it depends on the GPU model and driver.
 
-**GPU FPS** comes from RTSS shared memory (`RTSSSharedMemoryV2`), which is the most reliable way to get per-game FPS on any GPU vendor (NVIDIA, AMD, Intel). RTSS hooks into any DirectX/OpenGL/Vulkan game and reports real-time framerate.
+**Fallback chain:**
+1. RTSS shared memory for FPS
+2. LibreHardwareMonitor WMI for all other sensors
+3. Python libraries (psutil) as final fallback
 
 **New config option in `config.yaml`:**
 ```yaml
-# - HWINFO  use HWiNFO for CPU sensors + RTSS for GPU FPS (Windows only), fallback to LHM WMI / Python libs
+# - HWINFO  use LHM WMI for hardware sensors + RTSS for GPU FPS (Windows only)
 ```
 
 ### 2. Suspend/Resume & Graceful Shutdown (`power_handler.py`)
