@@ -1,26 +1,51 @@
-# Turing Smart Screen - Python System Monitor (NVIDIA, RTSS & LHM Fork)
+# Turing Smart Screen - Python System Monitor (RTSS FPS + Suspend/Resume Fork)
 
-Este repositorio es un fork optimizado y corregido del proyecto original de `mathoudebine/turing-smart-screen-python`. Está enfocado en ofrecer una alternativa de código abierto, ligera y universal para monitorizar los recursos del sistema en pantallas secundarias IPS USB-C (Turing / TURZX de 3.5" y compatibles) bajo entornos Windows, solucionando las limitaciones de lectura de software tradicionales.
+Fork optimizado del proyecto original [mathoudebine/turing-smart-screen-python](https://github.com/mathoudebine/turing-smart-screen-python) con soporte de FPS via RTSS y manejo de suspensión/reanudación del sistema.
 
-## 🌟 El Motivo de este Fork (La arquitectura de telemetría)
+## Cambios respecto al original
 
-Las librerías de monitorización estándar y herramientas como **LibreHardwareMonitor** son excelentes para obtener datos de hardware puros (temperaturas, cargas, voltajes y frecuencias de CPU/GPU), pero **carecen por completo de soporte para leer los FPS (fotogramas por segundo)** en juegos y entornos renderizados por hardware NVIDIA.
+### 1. RTSS FPS en modo LHM
 
-Para solucionar esto, este fork reestructura el código de recolección de datos en Windows para trabajar mediante una configuración híbrida de alto rendimiento:
-1. **LibreHardwareMonitor:** Se encarga de extraer toda la telemetría térmica, porcentajes de uso y frecuencias del procesador y la gráfica.
-2. **RTSS (RivaTuner Statistics Server):** El script se conecta mediante Python al servidor de RivaTuner para capturar de forma nativa e inyectar los FPS reales de cualquier aplicación en primer plano.
+El módulo `sensors_librehardwaremonitor.py` ahora lee FPS desde **RTSS (RivaTuner Statistics Server)** como fuente principal. Si RTSS no está disponible, vuelve al sensor FPS nativo de LHM.
 
-Al unificar ambas fuentes de datos directamente a través de código en Python (en lugar de depender de pesados ejecutables cerrados del fabricante), se consigue un monitor de sistema fluido, exacto, en tiempo real y sin retardo de hilos (*multithreading*).
+- Sin archivos nuevos, sin opciones de configuración nuevas
+- Usa `HW_SENSORS: LHM` o `AUTO` como siempre
+- Funciona con cualquier GPU (NVIDIA, AMD, Intel)
+- RTSS hookea DirectX/OpenGL/Vulkan y reporta el framerate real
 
-## 🛠️ Características de este Fork
+### 2. Suspend/Resume y Session Lock (`power_handler.py`)
 
-- **Soporte de FPS mediante RTSS:** Integración nativa con RivaTuner Statistics Server para mostrar los FPS en tiempo real de tu GPU NVIDIA.
-- **Telemetría Completa con LHM:** Monitorización precisa de temperaturas, uso de memoria, almacenamiento y reloj del sistema.
-- **Portabilidad Limpia:** Ejecución nativa en Python 3.9+, transparente y sin residuos en el sistema operativo.
+Proceso independiente que gestiona el monitor del sistema:
 
+- **Suspender/Reanudar** — detiene el monitor antes de dormir, lo rearranca al despertar
+- **Bloqueo de sesión** — detiene el monitor al bloquear (Win+L), lo rearranca al desbloquear
+- **Apagado del sistema** — parada limpia via archivo `.shutdown_signal`
 
-## 📋 Requisitos Previos
+`main.py` comprueba `.shutdown_signal` en cada iteración del bucle principal para salir limpiamente.
 
-1. Tener instalado **Python 3.9 o superior** en Windows (asegúrate de marcar la casilla *"Add Python to PATH"* en el instalador).
-2. Tener **RivaTuner Statistics Server (RTSS)** ejecutándose en segundo plano (suele venir integrado junto a MSI Afterburner) para la telemetría de FPS.
-3. Asegurar el acceso o ejecución de **LibreHardwareMonitor** en tu sistema para la lectura del resto de sensores.
+## Requisitos
+
+1. Python 3.9+ en Windows
+2. Ejecutar como administrador (requerido por LHM)
+3. RTSS corriendo en segundo plano (viene con MSI Afterburner) para FPS en juegos
+4. Pantalla USB-C compatible (Turing Smart Screen, TURZX, XuanFang, etc.)
+
+## Instalación
+
+```bash
+pip install -r requirements.txt
+python main.py
+```
+
+Para ejecución automática con manejo de suspensión:
+
+```bash
+python power_handler.py
+```
+
+## Configuración (`config.yaml`)
+
+```yaml
+HW_SENSORS: LHM      # Usa LHM + RTSS FPS (Windows, requiere admin)
+# HW_SENSORS: AUTO   # Equivalente a LHM en Windows, Python en Linux/Mac
+```
