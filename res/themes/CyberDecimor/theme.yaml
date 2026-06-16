@@ -97,7 +97,7 @@ STATS:
       INTERVAL: 1
       TEXT:
         SHOW: True
-        SHOW_UNIT: True
+        SHOW_UNIT: False
         X: 175
         Y: 127
         FONT: generale-mono/GeneraleMonoA.ttf
@@ -162,7 +162,7 @@ STATS:
     POWER:
       TEXT:
         SHOW: True
-        SHOW_UNIT: True
+        SHOW_UNIT: False
         X: 175
         Y: 215
         FONT: generale-mono/GeneraleMonoA.ttf

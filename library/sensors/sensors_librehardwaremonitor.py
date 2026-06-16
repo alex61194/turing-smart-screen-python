@@ -218,7 +218,10 @@ class Cpu(sensors.Cpu):
         try:
             for sensor in cpu.Sensors:
                 if sensor.SensorType == Hardware.SensorType.Power and str(sensor.Name).startswith("CPU Package") and sensor.Value is not None:
-                    return float(sensor.Value)
+                    val = float(sensor.Value)
+                    if val < 0 or val > 1000:
+                        return math.nan
+                    return val
         except:
             pass
         return math.nan
@@ -328,10 +331,16 @@ class Gpu(sensors.Gpu):
             for sensor in gpu_to_use.Sensors:
                 if sensor.SensorType == Hardware.SensorType.Power and sensor.Value is not None:
                     if "GPU Package" in str(sensor.Name) or "GPU Total" in str(sensor.Name):
-                        return float(sensor.Value)
+                        val = float(sensor.Value)
+                        if val < 0 or val > 1000:
+                            return math.nan
+                        return val
             for sensor in gpu_to_use.Sensors:
                 if sensor.SensorType == Hardware.SensorType.Power and sensor.Value is not None:
-                    return float(sensor.Value)
+                    val = float(sensor.Value)
+                    if val < 0 or val > 1000:
+                        return math.nan
+                    return val
         except:
             pass
         return math.nan
