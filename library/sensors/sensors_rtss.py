@@ -2,7 +2,6 @@ import math
 import struct
 
 from library.sensors.sensors_librehardwaremonitor import *
-from library.sensors.sensors_librehardwaremonitor import Gpu as _LhmGpuClass
 from library.log import logger
 
 _RTSS_MEMORY_MAP_NAME = "RTSSSharedMemoryV2"
@@ -26,7 +25,7 @@ def _check_rtss():
 _check_rtss()
 
 
-def _read_rtss_fps() -> float:
+def _read_rtss_fps():
     if not _rtss_available:
         return math.nan
     try:
@@ -48,16 +47,11 @@ def _read_rtss_fps() -> float:
         return math.nan
 
 
-_original_fps = _LhmGpuClass.fps.__func__
-
-
-@classmethod
-def _rtss_fps(cls):
-    fps = _read_rtss_fps()
-    if not math.isnan(fps) and fps > 0:
-        cls.prev_fps = int(fps)
-        return cls.prev_fps
-    return _original_fps(cls)
-
-
-_LhmGpuClass.fps = _rtss_fps
+class Gpu(Gpu):
+    @classmethod
+    def fps(cls):
+        fps_val = _read_rtss_fps()
+        if not math.isnan(fps_val) and fps_val > 0:
+            cls.prev_fps = int(fps_val)
+            return cls.prev_fps
+        return super().fps()
