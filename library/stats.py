@@ -417,18 +417,18 @@ class CPU:
                 cpu_power_text_data['SHOW'] = False
                 theme_data['LINE_GRAPH']['SHOW'] = False
 
+        display_themed_value(
+            theme_data=theme_data['TEXT'],
+            value=f'{cpu_power:.0f}',
+            unit=" W",
+            min_size=4
+        )
         need_refresh = True
         if not math.isnan(cls.last_values_cpu_power[-2]):
             if int(cpu_power) == int(cls.last_values_cpu_power[-2]):
                 need_refresh = False
         if need_refresh or forced_refresh:
-            display_themed_value(
-                theme_data=theme_data['TEXT'],
-                value=f'{cpu_power:.0f}',
-                unit=" W",
-                min_size=4
-            )
-        display_themed_line_graph(theme_data['LINE_GRAPH'], cls.last_values_cpu_power)
+            display_themed_line_graph(theme_data['LINE_GRAPH'], cls.last_values_cpu_power)
 
 
 class Gpu:
@@ -696,18 +696,18 @@ class Gpu:
                     gpu_power_text_data['SHOW'] = False
                     gpu_power_line_graph_data['SHOW'] = False
 
+            display_themed_value(
+                theme_data=gpu_power_text_data,
+                value=f'{gpu_power:.0f}',
+                unit=" W",
+                min_size=4
+            )
             need_refresh = True
             if not math.isnan(cls.last_values_gpu_power[-2]):
                 if int(gpu_power) == int(cls.last_values_gpu_power[-2]):
                     need_refresh = False
             if need_refresh or forced_refresh:
-                display_themed_value(
-                    theme_data=gpu_power_text_data,
-                    value=f'{gpu_power:.0f}',
-                    unit=" W",
-                    min_size=4
-                )
-            display_themed_line_graph(gpu_power_line_graph_data, cls.last_values_gpu_power)
+                display_themed_line_graph(gpu_power_line_graph_data, cls.last_values_gpu_power)
 
     @staticmethod
     def is_available():
