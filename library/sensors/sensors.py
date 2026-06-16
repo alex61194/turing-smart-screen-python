@@ -51,6 +51,11 @@ class Cpu(ABC):
     def fan_percent(fan_name: str = None) -> float:
         pass
 
+    @staticmethod
+    @abstractmethod
+    def power() -> float:
+        pass
+
 
 class Gpu(ABC):
     @staticmethod
@@ -72,6 +77,11 @@ class Gpu(ABC):
     @staticmethod
     @abstractmethod
     def frequency() -> float:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def power() -> float:
         pass
 
     @staticmethod

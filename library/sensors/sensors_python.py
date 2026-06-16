@@ -181,6 +181,10 @@ class Cpu(sensors.Cpu):
 
         return math.nan
 
+    @staticmethod
+    def power() -> float:
+        return math.nan
+
 
 class Gpu(sensors.Gpu):
     @staticmethod
@@ -221,6 +225,10 @@ class Gpu(sensors.Gpu):
             return math.nan
 
     @staticmethod
+    def power() -> float:
+        return math.nan
+
+    @staticmethod
     def is_available() -> bool:
         global DETECTED_GPU
         # Always use Nvidia GPU if available
@@ -239,6 +247,48 @@ class Gpu(sensors.Gpu):
                                "https://github.com/mathoudebine/turing-smart-screen-python/wiki/Troubleshooting#linux--macos-no-supported-gpu-found-with-an-amd-gpu-and-python-311")
 
         return DETECTED_GPU != GpuType.UNSUPPORTED
+
+
+def _read_rtss_fps() -> int:
+    try:
+        import struct, ctypes, ctypes.wintypes
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel32.OpenFileMappingW.restype = ctypes.wintypes.HANDLE
+        kernel32.OpenFileMappingW.argtypes = [ctypes.wintypes.DWORD, ctypes.wintypes.BOOL, ctypes.wintypes.LPCWSTR]
+        kernel32.MapViewOfFile.restype = ctypes.c_void_p
+        kernel32.MapViewOfFile.argtypes = [ctypes.wintypes.HANDLE, ctypes.wintypes.DWORD, ctypes.wintypes.DWORD, ctypes.wintypes.DWORD, ctypes.c_size_t]
+        kernel32.UnmapViewOfFile.restype = ctypes.wintypes.BOOL
+        kernel32.UnmapViewOfFile.argtypes = [ctypes.c_void_p]
+        kernel32.CloseHandle.restype = ctypes.wintypes.BOOL
+        kernel32.CloseHandle.argtypes = [ctypes.wintypes.HANDLE]
+        h = kernel32.OpenFileMappingW(0x0004, False, "RTSSSharedMemoryV2")
+        if not h:
+            return 0
+        p = kernel32.MapViewOfFile(h, 0x0004, 0, 0, 0)
+        if not p:
+            kernel32.CloseHandle(h)
+            return 0
+        entry_size = struct.unpack_from("<I", ctypes.string_at(p + 8, 4))[0]
+        arr_offset = struct.unpack_from("<I", ctypes.string_at(p + 12, 4))[0]
+        arr_count = struct.unpack_from("<I", ctypes.string_at(p + 16, 4))[0]
+        for i in range(arr_count):
+            eb = p + arr_offset + i * entry_size
+            pid = struct.unpack_from("<I", ctypes.string_at(eb, 4))[0]
+            if pid == 0:
+                continue
+            t0 = struct.unpack_from("<I", ctypes.string_at(eb + 268, 4))[0]
+            t1 = struct.unpack_from("<I", ctypes.string_at(eb + 272, 4))[0]
+            frames = struct.unpack_from("<I", ctypes.string_at(eb + 276, 4))[0]
+            dt = t1 - t0
+            if dt > 0 and frames > 0:
+                kernel32.UnmapViewOfFile(p)
+                kernel32.CloseHandle(h)
+                return int(frames * 1000.0 / dt)
+        kernel32.UnmapViewOfFile(p)
+        kernel32.CloseHandle(h)
+    except Exception:
+        pass
+    return 0
 
 
 class GpuNvidia(sensors.Gpu):
@@ -281,7 +331,11 @@ class GpuNvidia(sensors.Gpu):
 
     @staticmethod
     def fps() -> int:
-        # Not supported by Python libraries
+        try:
+            fps_val = _read_rtss_fps()
+            return fps_val
+        except Exception:
+            pass
         return -1
 
     @staticmethod
@@ -301,6 +355,10 @@ class GpuNvidia(sensors.Gpu):
     @staticmethod
     def frequency() -> float:
         # Not supported by Python libraries
+        return math.nan
+
+    @staticmethod
+    def power() -> float:
         return math.nan
 
     @staticmethod
@@ -403,6 +461,10 @@ class GpuAmd(sensors.Gpu):
                 return math.nan
         except:
             return math.nan
+
+    @staticmethod
+    def power() -> float:
+        return math.nan
 
     @staticmethod
     def is_available() -> bool:

@@ -121,6 +121,13 @@ def CPUFanSpeed():
     stats.CPU.fan_speed()
 
 
+@async_job("CPU_Power")
+@schedule(timedelta(seconds=config.THEME_DATA['STATS']['CPU'].get('POWER', {}).get("INTERVAL", 0)).total_seconds())
+def CPUPower():
+    """ Refresh the CPU Power """
+    stats.CPU.power()
+
+
 @async_job("GPU_Stats")
 @schedule(timedelta(seconds=config.THEME_DATA['STATS'].get('GPU', {}).get("INTERVAL", 0)).total_seconds())
 def GpuStats():
