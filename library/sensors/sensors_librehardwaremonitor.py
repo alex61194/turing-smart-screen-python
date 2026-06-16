@@ -25,6 +25,7 @@
 import ctypes
 import math
 import os
+import struct
 import sys
 from statistics import mean
 from typing import Tuple
@@ -317,6 +318,11 @@ class Gpu(sensors.Gpu):
 
     @classmethod
     def fps(cls) -> int:
+        fps_val = _read_rtss_fps()
+        if not math.isnan(fps_val) and fps_val > 0:
+            cls.prev_fps = int(fps_val)
+            return cls.prev_fps
+
         gpu_to_use = cls.get_gpu_to_use()
         if gpu_to_use is None:
             # GPU not supported
@@ -493,3 +499,41 @@ class Net(sensors.Net):
                         download_rate = int(sensor.Value)
 
         return upload_rate, uploaded, download_rate, downloaded
+
+
+# RTSS shared memory FPS reading
+_RTSS_MEMORY_MAP_NAME = "RTSSSharedMemoryV2"
+_RTSS_BUFFER_ENTRY_STRIDE = 0x400
+_RTSS_ENTRY_FRAMERATE = 8
+
+_rtss_available = False
+
+try:
+    import mmap
+    mmap.mmap(-1, 16, _RTSS_MEMORY_MAP_NAME).close()
+    _rtss_available = True
+    logger.info("RTSS shared memory available for FPS reading")
+except:
+    pass
+
+
+def _read_rtss_fps():
+    if not _rtss_available:
+        return math.nan
+    try:
+        import mmap
+        m = mmap.mmap(-1, 0x10000, _RTSS_MEMORY_MAP_NAME)
+        entries = struct.unpack_from('<I', m, 0x3C)[0]
+        for i in range(entries):
+            off = 0x400 + i * _RTSS_BUFFER_ENTRY_STRIDE
+            eid = struct.unpack_from('<I', m, off + 8)[0]
+            if eid == _RTSS_ENTRY_FRAMERATE:
+                fps = struct.unpack_from('<d', m, off + 0x18)[0]
+                m.close()
+                if 0 < fps < 999:
+                    return fps
+                return math.nan
+        m.close()
+        return math.nan
+    except:
+        return math.nan

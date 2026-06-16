@@ -1,27 +1,23 @@
-## HWiNFO sensor backend + suspend/resume support
+## RTSS FPS support via LibreHardwareMonitor + suspend/resume handling
 
-### 1. New `HW_SENSORS: HWINFO` backend
+### 1. RTSS FPS reading added to LHM mode
 
-Adds a new sensor backend (`sensors_hwinfo.py`) that uses **LibreHardwareMonitor (pythonnet/clr)** for all hardware sensors (CPU temp/freq, GPU stats, memory, disk, network) plus **RTSS (RivaTuner Statistics Server) shared memory** for in-game GPU FPS.
+Adds **RTSS (RivaTuner Statistics Server) shared memory FPS reading** to the existing `sensors_librehardwaremonitor.py` module. No new config options or files needed — just use `HW_SENSORS: LHM` (or `AUTO` on Windows) as before.
 
-**Fallback chain for FPS:**
-1. RTSS shared memory (`RTSSSharedMemoryV2`) — works with any GPU vendor (NVIDIA, AMD, Intel)
-2. LibreHardwareMonitor's built-in FPS sensor via `SensorType.Factor`
+**How it works:**
+- `Gpu.fps()` now reads from RTSS shared memory (`RTSSSharedMemoryV2`) first
+- Falls back to LHM's built-in `SensorType.Factor` FPS sensor if RTSS is not available
+- RTSS works with any GPU vendor (NVIDIA, AMD, Intel) and hooks into DirectX/OpenGL/Vulkan
 
-The existing LHM FPS reading is unreliable — it depends on the GPU model and driver. RTSS hooks into any DirectX/OpenGL/Vulkan game and reports real-time framerate.
-
-**New config option in `config.yaml`:**
-```yaml
-# - HWINFO  use LHM (pythonnet/clr) for hardware sensors + RTSS for GPU FPS (Windows only)
-```
+The existing LHM FPS reading via `Hardware.SensorType.Factor` is unreliable — it depends on the GPU model and driver.
 
 ### 2. Suspend/Resume & Session Lock handling (`power_handler.py`)
 
-A standalone process that manages the main system monitor, handling:
+A standalone Windows process that manages the system monitor, handling:
 - **System suspend/resume** — gracefully stops the monitor before sleep, restarts on wake
-- **Session lock/unlock** — stops the monitor when the user locks the session
-- **System shutdown** — ensures clean shutdown via a signal file
+- **Session lock/unlock** — stops the monitor on session lock, restarts on unlock
+- **System shutdown** — ensures clean shutdown via a `.shutdown_signal` file
 
-The `main.py` event loop checks for a `.shutdown_signal` file and exits cleanly when detected, removing the file before stopping.
+The `main.py` event loop checks for a `.shutdown_signal` file at each iteration and exits cleanly when detected.
 
-No mandatory changes — existing behavior is preserved when `HW_SENSORS: AUTO` (the default).
+No mandatory changes — existing behavior is preserved.

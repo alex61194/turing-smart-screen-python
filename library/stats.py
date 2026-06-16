@@ -68,19 +68,6 @@ elif HW_SENSORS == "STUB":
 elif HW_SENSORS == "STATIC":
     logger.warning("Stub sensors, not real HW sensors")
     import library.sensors.sensors_stub_static as sensors
-elif HW_SENSORS == "HWINFO":
-    if platform.system() == 'Windows':
-        import library.sensors.sensors_hwinfo as sensors
-    else:
-        logger.error("HWiNFO integration is only available on Windows")
-        try:
-            sys.exit(0)
-        except:
-            os._exit(0)
-        try:
-            sys.exit(0)
-        except:
-            os._exit(0)
 elif HW_SENSORS == "AUTO":
     if platform.system() == 'Windows':
         import library.sensors.sensors_librehardwaremonitor as sensors
