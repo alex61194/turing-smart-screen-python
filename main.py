@@ -252,6 +252,8 @@ if __name__ == "__main__":
         tray_icon.run()
 
     elif platform.system() == "Windows":  # Windows-specific
+        SHUTDOWN_SIGNAL_FILE = os.path.join(MAIN_DIRECTORY, ".shutdown_signal")
+
         # Create a hidden window just to be able to receive window message events (for shutdown/logoff clean stop)
         hinst = win32api.GetModuleHandle(None)
         wndclass = win32gui.WNDCLASS()
@@ -280,9 +282,19 @@ if __name__ == "__main__":
                                            0,
                                            hinst,
                                            None)
-            while not os.path.exists('.shutdown_signal'):
+            while True:
                 # Receive and dispatch window messages
                 win32gui.PumpWaitingMessages()
+
+                # Check if power_handler requested shutdown (suspend/shutdown)
+                if os.path.isfile(SHUTDOWN_SIGNAL_FILE):
+                    logger.info("Shutdown requested by power handler")
+                    try:
+                        os.remove(SHUTDOWN_SIGNAL_FILE)
+                    except:
+                        pass
+                    clean_stop()
+
                 time.sleep(0.5)
 
         except Exception as e:
