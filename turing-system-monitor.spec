@@ -7,7 +7,7 @@ configure_a = Analysis(
     pathex=[],
     binaries=[],
     datas=[('res', 'res'), ('config.yaml', '.'), ('external', 'external')],
-    hiddenimports=['PIL', 'PIL._imagingtk', 'PIL._tkinter_finder'],
+    hiddenimports=['PIL', 'PIL._imagingtk', 'PIL._tkinter_finder', 'library.sensors.sensors_rtss'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -36,6 +36,7 @@ configure_exe = EXE(
     icon=['res\\icons\\monitor-icon-17865\\icon.ico'],
     contents_directory='.',
     version='tools\\windows-installer\\pyinstaller-version-info.txt',
+    uac_admin=True,
 )
 
 # System Monitor main program
@@ -45,7 +46,7 @@ main_a = Analysis(
     pathex=[],
     binaries=[],
     datas=[('res', 'res'), ('config.yaml', '.'), ('external', 'external')],
-    hiddenimports=['PIL', 'PIL._imagingtk', 'PIL._tkinter_finder'],
+    hiddenimports=['PIL', 'PIL._imagingtk', 'PIL._tkinter_finder', 'library.sensors.sensors_rtss'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -74,6 +75,7 @@ main_exe = EXE(
     icon=['res\\icons\\monitor-icon-17865\\icon.ico'],
     contents_directory='.',
     version='tools\\windows-installer\\pyinstaller-version-info.txt',
+    uac_admin=True,
 )
 
 # Theme Editor
@@ -83,7 +85,7 @@ editor_a = Analysis(
     pathex=[],
     binaries=[],
     datas=[('res', 'res'), ('config.yaml', '.'), ('external', 'external')],
-    hiddenimports=['PIL', 'PIL._imagingtk', 'PIL._tkinter_finder'],
+    hiddenimports=['PIL', 'PIL._imagingtk', 'PIL._tkinter_finder', 'library.sensors.sensors_rtss'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
