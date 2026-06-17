@@ -179,7 +179,7 @@ class Cpu(sensors.Cpu):
                             sensor.Name) and sensor.Value is not None:
                         frequencies.append(float(sensor.Value))
             if frequencies:
-                return mean(frequencies)
+                return max(frequencies)
         except:
             pass
         return math.nan
