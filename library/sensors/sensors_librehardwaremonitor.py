@@ -497,6 +497,7 @@ def _read_rtss_fps():
             entry_size = struct.unpack_from("<I", ctypes.string_at(p + 8, 4))[0]
             arr_offset = struct.unpack_from("<I", ctypes.string_at(p + 12, 4))[0]
             arr_count = struct.unpack_from("<I", ctypes.string_at(p + 16, 4))[0]
+            best_fps = 0.0
             for i in range(arr_count):
                 eb = p + arr_offset + i * entry_size
                 pid = struct.unpack_from("<I", ctypes.string_at(eb, 4))[0]
@@ -507,7 +508,11 @@ def _read_rtss_fps():
                 frames = struct.unpack_from("<I", ctypes.string_at(eb + 276, 4))[0]
                 dt = t1 - t0
                 if dt > 0 and frames > 0:
-                    return float(int(frames * 1000.0 / dt))
+                    fps = float(int(frames * 1000.0 / dt))
+                    if fps > best_fps:
+                        best_fps = fps
+            if best_fps > 0:
+                return best_fps
         finally:
             kernel32.UnmapViewOfFile(p)
             kernel32.CloseHandle(h)
