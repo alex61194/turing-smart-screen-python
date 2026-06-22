@@ -453,46 +453,46 @@ class Net(sensors.Net):
 
 # RTSS shared memory FPS reading
 
-_rtss_available = False
+_rtss_logged_available = False
+_rtss_logged_unavailable = False
 
 try:
     import ctypes
     import ctypes.wintypes
-    kernel32_check = ctypes.WinDLL("kernel32", use_last_error=True)
-    kernel32_check.OpenFileMappingW.restype = ctypes.wintypes.HANDLE
-    kernel32_check.OpenFileMappingW.argtypes = [ctypes.wintypes.DWORD, ctypes.wintypes.BOOL, ctypes.wintypes.LPCWSTR]
-    _h = kernel32_check.OpenFileMappingW(0x0004, False, "RTSSSharedMemoryV2")
-    if _h:
-        kernel32_check.CloseHandle(_h)
-        _rtss_available = True
-        logger.info("RTSS shared memory available for FPS reading")
+    import struct
+    _rtss_ctypes_ok = True
+    _kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    _kernel32.OpenFileMappingW.restype = ctypes.wintypes.HANDLE
+    _kernel32.OpenFileMappingW.argtypes = [ctypes.wintypes.DWORD, ctypes.wintypes.BOOL, ctypes.wintypes.LPCWSTR]
+    _kernel32.MapViewOfFile.restype = ctypes.c_void_p
+    _kernel32.MapViewOfFile.argtypes = [ctypes.wintypes.HANDLE, ctypes.wintypes.DWORD, ctypes.wintypes.DWORD, ctypes.wintypes.DWORD, ctypes.c_size_t]
+    _kernel32.UnmapViewOfFile.restype = ctypes.wintypes.BOOL
+    _kernel32.UnmapViewOfFile.argtypes = [ctypes.c_void_p]
+    _kernel32.CloseHandle.restype = ctypes.wintypes.BOOL
+    _kernel32.CloseHandle.argtypes = [ctypes.wintypes.HANDLE]
 except:
-    pass
+    _rtss_ctypes_ok = False
 
 
 def _read_rtss_fps():
-    if not _rtss_available:
+    global _rtss_logged_available, _rtss_logged_unavailable
+    if not _rtss_ctypes_ok:
         return math.nan
     try:
-        import ctypes
-        import ctypes.wintypes
-        import struct
-        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
-        kernel32.OpenFileMappingW.restype = ctypes.wintypes.HANDLE
-        kernel32.OpenFileMappingW.argtypes = [ctypes.wintypes.DWORD, ctypes.wintypes.BOOL, ctypes.wintypes.LPCWSTR]
-        kernel32.MapViewOfFile.restype = ctypes.c_void_p
-        kernel32.MapViewOfFile.argtypes = [ctypes.wintypes.HANDLE, ctypes.wintypes.DWORD, ctypes.wintypes.DWORD, ctypes.wintypes.DWORD, ctypes.c_size_t]
-        kernel32.UnmapViewOfFile.restype = ctypes.wintypes.BOOL
-        kernel32.UnmapViewOfFile.argtypes = [ctypes.c_void_p]
-        kernel32.CloseHandle.restype = ctypes.wintypes.BOOL
-        kernel32.CloseHandle.argtypes = [ctypes.wintypes.HANDLE]
-        h = kernel32.OpenFileMappingW(0x0004, False, "RTSSSharedMemoryV2")
+        h = _kernel32.OpenFileMappingW(0x0004, False, "RTSSSharedMemoryV2")
         if not h:
+            if not _rtss_logged_unavailable:
+                logger.info("RTSS not running yet — will retry FPS reading automatically")
+                _rtss_logged_unavailable = True
             return math.nan
-        p = kernel32.MapViewOfFile(h, 0x0004, 0, 0, 0)
+        p = _kernel32.MapViewOfFile(h, 0x0004, 0, 0, 0)
         if not p:
-            kernel32.CloseHandle(h)
+            _kernel32.CloseHandle(h)
             return math.nan
+        if not _rtss_logged_available:
+            logger.info("RTSS shared memory available for FPS reading")
+            _rtss_logged_available = True
+            _rtss_logged_unavailable = False
         try:
             entry_size = struct.unpack_from("<I", ctypes.string_at(p + 8, 4))[0]
             arr_offset = struct.unpack_from("<I", ctypes.string_at(p + 12, 4))[0]
@@ -514,8 +514,8 @@ def _read_rtss_fps():
             if best_fps > 0:
                 return best_fps
         finally:
-            kernel32.UnmapViewOfFile(p)
-            kernel32.CloseHandle(h)
+            _kernel32.UnmapViewOfFile(p)
+            _kernel32.CloseHandle(h)
     except Exception:
         pass
     return math.nan
