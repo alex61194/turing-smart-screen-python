@@ -97,7 +97,7 @@ STATS:
       INTERVAL: 1
       TEXT:
         SHOW: True
-        SHOW_UNIT: False
+        SHOW_UNIT: True
         X: 175
         Y: 127
         FONT: generale-mono/GeneraleMonoA.ttf
@@ -129,6 +129,10 @@ STATS:
         FONT_SIZE: 40
         FONT_COLOR: 50, 216, 243
         BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
     MEMORY:
       TEXT:
         SHOW: True
@@ -139,6 +143,25 @@ STATS:
         FONT_SIZE: 16
         FONT_COLOR: 255, 200, 255
         BACKGROUND_IMAGE: background.png
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+    MEMORY_PERCENT:
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      TEXT:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    MEMORY_USED:
+      TEXT:
+        SHOW: False
+    MEMORY_TOTAL:
+      TEXT:
+        SHOW: False
     TEMPERATURE:
       TEXT:
         SHOW: True
@@ -149,6 +172,12 @@ STATS:
         FONT_SIZE: 16
         FONT_COLOR: 50, 216, 243
         BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
     FPS:
       TEXT:
         SHOW: True
@@ -159,10 +188,34 @@ STATS:
         FONT_SIZE: 15
         FONT_COLOR: 50, 216, 243
         BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    FAN_SPEED:
+      TEXT:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    FREQUENCY:
+      TEXT:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
     POWER:
       TEXT:
         SHOW: True
-        SHOW_UNIT: False
+        SHOW_UNIT: True
         X: 175
         Y: 215
         FONT: generale-mono/GeneraleMonoA.ttf
