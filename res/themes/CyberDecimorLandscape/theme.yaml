@@ -1,0 +1,411 @@
+---
+author: "@SylwiaGo — landscape version of CyberDecimor"
+
+display:
+  DISPLAY_SIZE: 3.5"
+  DISPLAY_ORIENTATION: landscape
+  DISPLAY_RGB_LED: 50, 216, 243
+
+static_images:
+  BACKGROUND:
+    PATH: background.png
+    X: 0
+    Y: 0
+    WIDTH: 480
+    HEIGHT: 320
+
+static_text:
+  CPU_MODEL:
+    TEXT: I7 12700K
+    X: 50
+    Y: 60
+    FONT: generale-mono/GeneraleMonoA.ttf
+    FONT_SIZE: 13
+    FONT_COLOR: 255, 200, 255
+    BACKGROUND_IMAGE: background.png
+  GPU_MODEL:
+    TEXT: 4070 RTX
+    X: 290
+    Y: 60
+    FONT: generale-mono/GeneraleMonoA.ttf
+    FONT_SIZE: 13
+    FONT_COLOR: 255, 200, 255
+    BACKGROUND_IMAGE: background.png
+  RAM_MODEL:
+    TEXT: VENGEANCE LPX 32GB
+    X: 50
+    Y: 125
+    FONT: generale-mono/GeneraleMonoA.ttf
+    FONT_SIZE: 13
+    FONT_COLOR: 255, 200, 255
+    BACKGROUND_IMAGE: background.png
+  FPS_LABEL:
+    TEXT: FPS
+    X: 10
+    Y: 258
+    FONT: generale-mono/GeneraleMonoA.ttf
+    FONT_SIZE: 14
+    FONT_COLOR: 255, 200, 255
+    BACKGROUND_IMAGE: background.png
+
+STATS:
+  CPU:
+    PERCENTAGE:
+      INTERVAL: 1
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 175
+        Y: 5
+        FONT: generale-mono/GeneraleMonoA.ttf
+        FONT_SIZE: 32
+        FONT_COLOR: 50, 216, 243
+        BACKGROUND_IMAGE: background.png
+      GRAPH:
+        SHOW: True
+        X: 40
+        Y: 42
+        WIDTH: 130
+        HEIGHT: 10
+        MIN_VALUE: 0
+        MAX_VALUE: 100
+        BAR_COLOR: 50, 216, 243
+        BAR_OUTLINE: True
+        BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    FREQUENCY:
+      INTERVAL: 1
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 95
+        Y: 8
+        FONT: generale-mono/GeneraleMonoA.ttf
+        FONT_SIZE: 14
+        FONT_COLOR: 255, 200, 255
+        BACKGROUND_IMAGE: background.png
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    TEMPERATURE:
+      INTERVAL: 1
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 28
+        Y: 8
+        FONT: generale-mono/GeneraleMonoA.ttf
+        FONT_SIZE: 14
+        FONT_COLOR: 50, 216, 243
+        BACKGROUND_IMAGE: background.png
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    LOAD:
+      INTERVAL: 0
+      ONE:
+        TEXT:
+          SHOW: False
+      FIVE:
+        TEXT:
+          SHOW: False
+      FIFTEEN:
+        TEXT:
+          SHOW: False
+    FAN_SPEED:
+      INTERVAL: 0
+      TEXT:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    POWER:
+      INTERVAL: 1
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: False
+        X: 175
+        Y: 60
+        FONT: generale-mono/GeneraleMonoA.ttf
+        FONT_SIZE: 13
+        FONT_COLOR: 255, 200, 255
+        BACKGROUND_IMAGE: background.png
+      LINE_GRAPH:
+        SHOW: False
+  GPU:
+    INTERVAL: 1
+    PERCENTAGE:
+      GRAPH:
+        SHOW: True
+        X: 280
+        Y: 42
+        WIDTH: 130
+        HEIGHT: 10
+        MIN_VALUE: 0
+        MAX_VALUE: 100
+        BAR_COLOR: 50, 216, 243
+        BAR_OUTLINE: True
+        BACKGROUND_IMAGE: background.png
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 415
+        Y: 5
+        FONT: generale-mono/GeneraleMonoA.ttf
+        FONT_SIZE: 32
+        FONT_COLOR: 50, 216, 243
+        BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    MEMORY:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 335
+        Y: 8
+        FONT: generale-mono/GeneraleMonoA.ttf
+        FONT_SIZE: 14
+        FONT_COLOR: 255, 200, 255
+        BACKGROUND_IMAGE: background.png
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    MEMORY_PERCENT:
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      TEXT:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    MEMORY_USED:
+      TEXT:
+        SHOW: False
+    MEMORY_TOTAL:
+      TEXT:
+        SHOW: False
+    TEMPERATURE:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 268
+        Y: 8
+        FONT: generale-mono/GeneraleMonoA.ttf
+        FONT_SIZE: 14
+        FONT_COLOR: 50, 216, 243
+        BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    FPS:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 55
+        Y: 255
+        FONT: generale-mono/GeneraleMonoA.ttf
+        FONT_SIZE: 18
+        FONT_COLOR: 50, 216, 243
+        BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: True
+        X: 110
+        Y: 255
+        WIDTH: 260
+        HEIGHT: 60
+        MIN_VALUE: 0
+        MAX_VALUE: 144
+        HISTORY_SIZE: 80
+        AUTOSCALE: True
+        LINE_COLOR: 50, 216, 243
+        LINE_WIDTH: 2
+        FILL: True
+        FILL_COLOR: 50, 216, 243, 40
+        ANTIALIAS: True
+        AXIS: True
+        AXIS_COLOR: 255, 200, 255
+        AXIS_FONT: roboto/Roboto-Bold.ttf
+        AXIS_FONT_SIZE: 9
+        BACKGROUND_IMAGE: background.png
+    FAN_SPEED:
+      TEXT:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    FREQUENCY:
+      TEXT:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    POWER:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: False
+        X: 415
+        Y: 60
+        FONT: generale-mono/GeneraleMonoA.ttf
+        FONT_SIZE: 13
+        FONT_COLOR: 255, 200, 255
+        BACKGROUND_IMAGE: background.png
+      LINE_GRAPH:
+        SHOW: False
+  MEMORY:
+    INTERVAL: 2
+    VIRTUAL:
+      GRAPH:
+        SHOW: True
+        X: 40
+        Y: 108
+        WIDTH: 130
+        HEIGHT: 10
+        MIN_VALUE: 0
+        MAX_VALUE: 100
+        BAR_COLOR: 50, 216, 243
+        BAR_OUTLINE: True
+        BACKGROUND_IMAGE: background.png
+      USED:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 40
+        Y: 80
+        FONT: generale-mono/GeneraleMonoA.ttf
+        FONT_SIZE: 14
+        FONT_COLOR: 50, 216, 243
+        BACKGROUND_IMAGE: background.png
+      FREE:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 122
+        Y: 80
+        FONT: generale-mono/GeneraleMonoA.ttf
+        FONT_SIZE: 14
+        FONT_COLOR: 255, 200, 255
+        BACKGROUND_IMAGE: background.png
+      PERCENT_TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 175
+        Y: 78
+        FONT: generale-mono/GeneraleMonoA.ttf
+        FONT_SIZE: 28
+        FONT_COLOR: 50, 216, 243
+        BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      TEXT:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    SWAP:
+      GRAPH:
+        SHOW: False
+      TEXT:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+  DATE:
+    INTERVAL: 1
+    DAY:
+      TEXT:
+        SHOW: True
+        X: 10
+        Y: 295
+        FONT: generale-mono/GeneraleMonoA.ttf
+        FONT_SIZE: 13
+        FONT_COLOR: 255, 200, 255
+        BACKGROUND_IMAGE: background.png
+        WIDTH: 160
+        ANCHOR: lt
+    HOUR:
+      TEXT:
+        SHOW: True
+        X: 390
+        Y: 258
+        FONT: generale-mono/GeneraleMonoA.ttf
+        FONT_SIZE: 16
+        FONT_COLOR: 255, 200, 255
+        BACKGROUND_IMAGE: background.png
+        WIDTH: 80
+        ANCHOR: rt
+  WEATHER:
+    INTERVAL: 300
+    TEMPERATURE:
+      TEXT:
+        SHOW: True
+        X: 460
+        Y: 295
+        FONT: generale-mono/GeneraleMonoA.ttf
+        FONT_SIZE: 13
+        FONT_COLOR: 50, 216, 243
+        BACKGROUND_IMAGE: background.png
+        WIDTH: 60
+        ANCHOR: rt
+    HUMIDITY:
+      TEXT:
+        SHOW: false
+    WEATHER_DESCRIPTION:
+      TEXT:
+        SHOW: false
+    TEMPERATURE_FELT:
+      TEXT:
+        SHOW: false
+    UPDATE_TIME:
+      TEXT:
+        SHOW: false
+  NET:
+    INTERVAL: 1
+    ETH:
+      UPLOAD:
+        TEXT:
+          SHOW: False
+        LINE_GRAPH:
+          SHOW: False
+      DOWNLOAD:
+        TEXT:
+          SHOW: False
+        LINE_GRAPH:
+          SHOW: False
+    WLO:
+      UPLOAD:
+        TEXT:
+          SHOW: False
+        LINE_GRAPH:
+          SHOW: False
+      DOWNLOAD:
+        TEXT:
+          SHOW: False
+        LINE_GRAPH:
+          SHOW: False
