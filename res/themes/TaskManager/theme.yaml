@@ -188,20 +188,22 @@ STATS:
       TEXT:
         SHOW: True
         SHOW_UNIT: True
-        X: 215
-        Y: 190
+        X: 384
+        Y: 270
         FONT: roboto-mono/RobotoMono-Regular.ttf
-        FONT_SIZE: 18
-        FONT_COLOR: 184, 87, 200
+        FONT_SIZE: 20
+        FONT_COLOR: 175, 175, 175
         BACKGROUND_IMAGE: background.png
+        ALIGN: center
+        ANCHOR: ms
       RADIAL:
         SHOW: False
       GRAPH:
         SHOW: False
       LINE_GRAPH:
         SHOW: True
-        X: 174
-        Y: 220
+        X: 326
+        Y: 199
         WIDTH: 115
         HEIGHT: 53
         MIN_VALUE: 0
