@@ -1,0 +1,374 @@
+---
+author: "@approxit1 — modified: FPS replaces disk, power added, all sections complete"
+
+display:
+  DISPLAY_SIZE: 3.5"
+  DISPLAY_ORIENTATION: landscape
+  DISPLAY_RGB_LED: 0, 0, 0
+
+static_images:
+  BACKGROUND:
+    PATH: background.png
+    X: 0
+    Y: 0
+    WIDTH: 480
+    HEIGHT: 320
+
+STATS:
+  CPU:
+    PERCENTAGE:
+      INTERVAL: 1
+      LINE_GRAPH:
+        SHOW: True
+        X: 20
+        Y: 71
+        WIDTH: 115
+        HEIGHT: 53
+        MIN_VALUE: 0
+        MAX_VALUE: 100
+        HISTORY_SIZE: 50
+        AUTOSCALE: True
+        LINE_COLOR: 53, 171, 211
+        LINE_WIDTH: 3
+        FILL: True
+        FILL_COLOR: 53, 171, 211, 40
+        ANTIALIAS: True
+        AXIS: False
+        AXIS_COLOR: 170, 170, 170
+        BACKGROUND_IMAGE: background.png
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 60
+        Y: 163
+        FONT: roboto-mono/RobotoMono-Regular.ttf
+        FONT_SIZE: 20
+        FONT_COLOR: 175, 175, 175
+        BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+    TEMPERATURE:
+      INTERVAL: 1
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 60
+        Y: 140
+        FONT: roboto-mono/RobotoMono-Regular.ttf
+        FONT_SIZE: 22
+        FONT_COLOR: 175, 175, 175
+        BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    FREQUENCY:
+      INTERVAL: 0
+      TEXT:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    LOAD:
+      INTERVAL: 0
+      ONE:
+        TEXT:
+          SHOW: False
+      FIVE:
+        TEXT:
+          SHOW: False
+      FIFTEEN:
+        TEXT:
+          SHOW: False
+    FAN_SPEED:
+      INTERVAL: 0
+      TEXT:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    POWER:
+      INTERVAL: 1
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: False
+        X: 60
+        Y: 190
+        FONT: roboto-mono/RobotoMono-Regular.ttf
+        FONT_SIZE: 18
+        FONT_COLOR: 53, 171, 211
+        BACKGROUND_IMAGE: background.png
+      LINE_GRAPH:
+        SHOW: False
+  GPU:
+    INTERVAL: 1
+    PERCENTAGE:
+      LINE_GRAPH:
+        SHOW: True
+        X: 174
+        Y: 71
+        WIDTH: 115
+        HEIGHT: 53
+        MIN_VALUE: 0
+        MAX_VALUE: 100
+        HISTORY_SIZE: 50
+        AUTOSCALE: False
+        LINE_COLOR: 184, 87, 200
+        LINE_WIDTH: 3
+        FILL: True
+        FILL_COLOR: 184, 87, 200, 40
+        ANTIALIAS: True
+        AXIS: False
+        AXIS_COLOR: 170, 170, 170
+        BACKGROUND_IMAGE: background.png
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 215
+        Y: 163
+        FONT: roboto-mono/RobotoMono-Regular.ttf
+        FONT_SIZE: 20
+        FONT_COLOR: 175, 175, 175
+        BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+    MEMORY:
+      TEXT:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    MEMORY_PERCENT:
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      TEXT:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    MEMORY_USED:
+      TEXT:
+        SHOW: False
+    MEMORY_TOTAL:
+      TEXT:
+        SHOW: False
+    TEMPERATURE:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 215
+        Y: 140
+        FONT: roboto-mono/RobotoMono-Regular.ttf
+        FONT_SIZE: 20
+        FONT_COLOR: 175, 175, 175
+        BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    FPS:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 215
+        Y: 190
+        FONT: roboto-mono/RobotoMono-Regular.ttf
+        FONT_SIZE: 18
+        FONT_COLOR: 184, 87, 200
+        BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: True
+        X: 174
+        Y: 220
+        WIDTH: 115
+        HEIGHT: 53
+        MIN_VALUE: 0
+        MAX_VALUE: 144
+        HISTORY_SIZE: 50
+        AUTOSCALE: True
+        LINE_COLOR: 184, 87, 200
+        LINE_WIDTH: 3
+        FILL: True
+        FILL_COLOR: 184, 87, 200, 40
+        ANTIALIAS: True
+        AXIS: False
+        AXIS_COLOR: 170, 170, 170
+        BACKGROUND_IMAGE: background.png
+    FAN_SPEED:
+      TEXT:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    FREQUENCY:
+      TEXT:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    POWER:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: False
+        X: 215
+        Y: 215
+        FONT: roboto-mono/RobotoMono-Regular.ttf
+        FONT_SIZE: 18
+        FONT_COLOR: 184, 87, 200
+        BACKGROUND_IMAGE: background.png
+      LINE_GRAPH:
+        SHOW: False
+  MEMORY:
+    INTERVAL: 2
+    VIRTUAL:
+      LINE_GRAPH:
+        SHOW: True
+        X: 326
+        Y: 71
+        WIDTH: 115
+        HEIGHT: 53
+        MIN_VALUE: 0
+        MAX_VALUE: 100
+        HISTORY_SIZE: 50
+        AUTOSCALE: False
+        LINE_COLOR: 89, 152, 239
+        LINE_WIDTH: 3
+        FILL: True
+        FILL_COLOR: 89, 152, 239, 40
+        ANTIALIAS: True
+        AXIS: False
+        AXIS_COLOR: 170, 170, 170
+        BACKGROUND_IMAGE: background.png
+      USED:
+        SHOW: True
+        SHOW_UNIT: False
+        X: 384
+        Y: 140
+        FONT: roboto-mono/RobotoMono-Regular.ttf
+        FONT_SIZE: 20
+        FONT_COLOR: 175, 175, 175
+        BACKGROUND_IMAGE: background.png
+      PERCENT_TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 371
+        Y: 163
+        FONT: roboto-mono/RobotoMono-Regular.ttf
+        FONT_SIZE: 20
+        FONT_COLOR: 175, 175, 175
+        BACKGROUND_IMAGE: background.png
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      TEXT:
+        SHOW: False
+    SWAP:
+      GRAPH:
+        SHOW: False
+      TEXT:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+  NET:
+    INTERVAL: 3
+    ETH:
+      UPLOAD:
+        LINE_GRAPH:
+          SHOW: True
+          X: 19
+          Y: 230
+          WIDTH: 115
+          HEIGHT: 23
+          MIN_VALUE: 0
+          MAX_VALUE: 9000000
+          HISTORY_SIZE: 50
+          AUTOSCALE: False
+          LINE_COLOR: 215, 85, 124
+          LINE_WIDTH: 3
+          FILL: True
+          FILL_COLOR: 215, 85, 124, 40
+          ANTIALIAS: True
+          AXIS: False
+          AXIS_COLOR: 250, 30, 0
+          BACKGROUND_IMAGE: background.png
+        TEXT:
+          SHOW: True
+          SHOW_UNIT: True
+          X: 64
+          Y: 300
+          FONT: roboto-mono/RobotoMono-Regular.ttf
+          FONT_SIZE: 15
+          FONT_COLOR: 175, 175, 175
+          BACKGROUND_IMAGE: background.png
+          ALIGN: center
+          ANCHOR: ms
+      DOWNLOAD:
+        LINE_GRAPH:
+          SHOW: True
+          X: 172
+          Y: 230
+          WIDTH: 115
+          HEIGHT: 22
+          MIN_VALUE: 0
+          MAX_VALUE: 90000000
+          HISTORY_SIZE: 50
+          AUTOSCALE: False
+          LINE_COLOR: 92, 158, 250
+          LINE_WIDTH: 3
+          FILL: True
+          FILL_COLOR: 92, 158, 250, 40
+          ANTIALIAS: True
+          AXIS: False
+          AXIS_COLOR: 170, 170, 170
+          BACKGROUND_IMAGE: background.png
+        TEXT:
+          SHOW: True
+          SHOW_UNIT: True
+          X: 218
+          Y: 300
+          FONT: roboto-mono/RobotoMono-Regular.ttf
+          FONT_SIZE: 15
+          FONT_COLOR: 175, 175, 175
+          BACKGROUND_IMAGE: background.png
+          ALIGN: center
+          ANCHOR: ms
+    WLO:
+      UPLOAD:
+        TEXT:
+          SHOW: False
+        LINE_GRAPH:
+          SHOW: False
+      DOWNLOAD:
+        TEXT:
+          SHOW: False
+        LINE_GRAPH:
+          SHOW: False
