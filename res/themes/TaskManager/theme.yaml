@@ -102,10 +102,10 @@ STATS:
       TEXT:
         SHOW: True
         SHOW_UNIT: False
-        X: 60
-        Y: 190
+        X: 100
+        Y: 163
         FONT: roboto-mono/RobotoMono-Regular.ttf
-        FONT_SIZE: 18
+        FONT_SIZE: 16
         FONT_COLOR: 53, 171, 211
         BACKGROUND_IMAGE: background.png
       LINE_GRAPH:
@@ -188,14 +188,13 @@ STATS:
       TEXT:
         SHOW: True
         SHOW_UNIT: True
-        X: 384
+        X: 355
         Y: 270
         FONT: roboto-mono/RobotoMono-Regular.ttf
-        FONT_SIZE: 20
+        FONT_SIZE: 13
         FONT_COLOR: 175, 175, 175
         BACKGROUND_IMAGE: background.png
-        ALIGN: center
-        ANCHOR: ms
+        ANCHOR: lt
       RADIAL:
         SHOW: False
       GRAPH:
@@ -240,10 +239,10 @@ STATS:
       TEXT:
         SHOW: True
         SHOW_UNIT: False
-        X: 215
-        Y: 215
+        X: 255
+        Y: 163
         FONT: roboto-mono/RobotoMono-Regular.ttf
-        FONT_SIZE: 18
+        FONT_SIZE: 16
         FONT_COLOR: 184, 87, 200
         BACKGROUND_IMAGE: background.png
       LINE_GRAPH:
