@@ -316,6 +316,61 @@ class MideaACPower(_MideaACBase):
         return "ENCENDIDO" if self._monitor.get("power_state") else "APAGADO"
 
 
+class MideaACFanSpeed(_MideaACBase):
+    _FAN_NAMES = {
+        0: "AUTO", 1: "BAJA", 2: "MEDIA",
+        3: "ALTA", 4: "MAX",
+    }
+
+    def as_numeric(self) -> float:
+        val = self._monitor.get("fan_speed")
+        return float(val.value) if val else 0.0
+
+    def as_string(self) -> str:
+        val = self._monitor.get("fan_speed")
+        if val is None:
+            return "--"
+        return self._FAN_NAMES.get(val.value, str(val.name))
+
+
+class MideaACEco(_MideaACBase):
+    def as_numeric(self) -> float:
+        return 1.0 if self._monitor.get("eco") else 0.0
+
+    def as_string(self) -> str:
+        return "ECO ✓" if self._monitor.get("eco") else "ECO"
+
+
+class MideaACTurbo(_MideaACBase):
+    def as_numeric(self) -> float:
+        return 1.0 if self._monitor.get("turbo") else 0.0
+
+    def as_string(self) -> str:
+        return "TURBO ✓" if self._monitor.get("turbo") else "TURBO"
+
+
+class MideaACTotalEnergy(_MideaACBase):
+    def as_numeric(self) -> float:
+        return self._monitor.get("total_energy") or 0.0
+
+    def as_string(self) -> str:
+        val = self._monitor.get("total_energy")
+        if val is None:
+            return "-- kWh"
+        return f"{val:.1f} kWh"
+
+
+class MideaACCurrentEnergy(_MideaACBase):
+    def as_numeric(self) -> float:
+        return self._monitor.get("current_energy") or 0.0
+
+    def as_string(self) -> str:
+        val = self._monitor.get("current_energy")
+        if val is None:
+            return "-- kWh"
+        return f"{val:.1f} kWh"
+
+
 # ---------------------------------------------------------------------------
 # FusionSolar (Huawei SUN2000) Integration via internal REST API
 # ---------------------------------------------------------------------------

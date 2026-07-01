@@ -439,7 +439,7 @@ STATS:
       TEXT:
         SHOW: True
         X: 160
-        Y: 444
+        Y: 468
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 10
         FONT_COLOR: 90, 110, 130
@@ -474,36 +474,79 @@ STATS:
     MideaACMode:
       TEXT:
         SHOW: True
-        X: 105
-        Y: 406
+        X: 100
+        Y: 402
         FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
         FONT_SIZE: 12
         FONT_COLOR: 0, 212, 255
         BACKGROUND_IMAGE: background.png
-        ANCHOR: mt
-        ALIGN: center
+    MideaACFanSpeed:
+      TEXT:
+        SHOW: True
+        X: 220
+        Y: 402
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 12
+        FONT_COLOR: 0, 212, 255
+        BACKGROUND_IMAGE: background.png
     MideaACTargetTemp:
       TEXT:
         SHOW: True
-        X: 215
-        Y: 406
+        X: 100
+        Y: 418
         FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
-        FONT_SIZE: 12
+        FONT_SIZE: 11
         FONT_COLOR: 0, 212, 255
         BACKGROUND_IMAGE: background.png
-        ANCHOR: mt
-        ALIGN: center
+    MideaACEco:
+      TEXT:
+        SHOW: True
+        X: 180
+        Y: 418
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 34, 197, 94
+        BACKGROUND_IMAGE: background.png
+    MideaACTurbo:
+      TEXT:
+        SHOW: True
+        X: 250
+        Y: 418
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 255, 200, 0
+        BACKGROUND_IMAGE: background.png
     MideaACPower:
       TEXT:
         SHOW: True
         X: 160
-        Y: 426
+        Y: 434
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 11
         FONT_COLOR: 34, 197, 94
         BACKGROUND_IMAGE: background.png
         ANCHOR: mt
         ALIGN: center
+    MideaACTotalEnergy:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 90
+        Y: 452
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 10
+        FONT_COLOR: 100, 116, 139
+        BACKGROUND_IMAGE: background.png
+    MideaACCurrentEnergy:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 230
+        Y: 452
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 10
+        FONT_COLOR: 100, 116, 139
+        BACKGROUND_IMAGE: background.png
     SolarGeneration:
       TEXT:
         SHOW: True
