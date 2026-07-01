@@ -560,7 +560,7 @@ STATS:
         ALIGN: center
     SolarConsumption:
       TEXT:
-        SHOW: True
+        SHOW: False
         X: 240
         Y: 160
         FONT: jetbrains-mono/JetBrainsMono-Bold.ttf

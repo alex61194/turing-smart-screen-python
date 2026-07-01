@@ -317,10 +317,10 @@ class MideaACPower(_MideaACBase):
 
 
 class MideaACFanSpeed(_MideaACBase):
-    _FAN_NAMES = {
-        0: "AUTO", 1: "BAJA", 2: "MEDIA",
-        3: "ALTA", 4: "MAX",
-    }
+_FAN_NAMES = {
+    0: "AUTO", 1: "BAJA", 2: "MEDIA",
+    3: "ALTA", 4: "MÁX",
+}
 
     def as_numeric(self) -> float:
         val = self._monitor.get("fan_speed")
@@ -338,7 +338,7 @@ class MideaACEco(_MideaACBase):
         return 1.0 if self._monitor.get("eco") else 0.0
 
     def as_string(self) -> str:
-        return "ECO ✓" if self._monitor.get("eco") else "ECO"
+        return "ECO" if self._monitor.get("eco") else None
 
 
 class MideaACTurbo(_MideaACBase):
@@ -346,7 +346,7 @@ class MideaACTurbo(_MideaACBase):
         return 1.0 if self._monitor.get("turbo") else 0.0
 
     def as_string(self) -> str:
-        return "TURBO ✓" if self._monitor.get("turbo") else "TURBO"
+        return "TURBO" if self._monitor.get("turbo") else None
 
 
 class MideaACTotalEnergy(_MideaACBase):
