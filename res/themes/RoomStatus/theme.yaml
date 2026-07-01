@@ -1,0 +1,552 @@
+---
+author: "RoomStatus — AC web style v2"
+
+display:
+  DISPLAY_SIZE: 3.5"
+  DISPLAY_ORIENTATION: portrait
+  DISPLAY_RGB_LED: 0, 212, 255
+
+static_images:
+  BACKGROUND:
+    PATH: background.png
+    X: 0
+    Y: 0
+    WIDTH: 320
+    HEIGHT: 480
+
+static_text:
+  HEADER_LABEL:
+    TEXT: "ROOMSTATUS"
+    X: 160
+    Y: 4
+    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT_SIZE: 8
+    FONT_COLOR: 60, 70, 90
+    BACKGROUND_IMAGE: background.png
+    ANCHOR: mt
+    ALIGN: center
+  FEELS_LABEL:
+    TEXT: "SENSACIÓN"
+    X: 80
+    Y: 86
+    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT_SIZE: 9
+    FONT_COLOR: 100, 116, 139
+    BACKGROUND_IMAGE: background.png
+    ANCHOR: mt
+    ALIGN: center
+  HUM_LABEL:
+    TEXT: "HUMEDAD"
+    X: 240
+    Y: 86
+    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT_SIZE: 9
+    FONT_COLOR: 100, 116, 139
+    BACKGROUND_IMAGE: background.png
+    ANCHOR: mt
+    ALIGN: center
+  SOLAR_LABEL:
+    TEXT: "PLACAS"
+    X: 80
+    Y: 142
+    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT_SIZE: 9
+    FONT_COLOR: 100, 116, 139
+    BACKGROUND_IMAGE: background.png
+    ANCHOR: mt
+    ALIGN: center
+  HOUSE_LABEL:
+    TEXT: "CONSUMO"
+    X: 240
+    Y: 142
+    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT_SIZE: 9
+    FONT_COLOR: 100, 116, 139
+    BACKGROUND_IMAGE: background.png
+    ANCHOR: mt
+    ALIGN: center
+  SURPLUS_LABEL:
+    TEXT: "EXCEDENTE"
+    X: 80
+    Y: 190
+    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT_SIZE: 8
+    FONT_COLOR: 100, 116, 139
+    BACKGROUND_IMAGE: background.png
+    ANCHOR: mt
+    ALIGN: center
+  MONEY_LABEL:
+    TEXT: "AHORRO"
+    X: 240
+    Y: 190
+    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT_SIZE: 8
+    FONT_COLOR: 100, 116, 139
+    BACKGROUND_IMAGE: background.png
+    ANCHOR: mt
+    ALIGN: center
+  CPU_LABEL:
+    TEXT: "CPU"
+    X: 20
+    Y: 248
+    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT_SIZE: 10
+    FONT_COLOR: 100, 116, 139
+    BACKGROUND_IMAGE: background.png
+  GPU_LABEL:
+    TEXT: "GPU"
+    X: 20
+    Y: 272
+    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT_SIZE: 10
+    FONT_COLOR: 100, 116, 139
+    BACKGROUND_IMAGE: background.png
+  RAM_LABEL:
+    TEXT: "RAM"
+    X: 20
+    Y: 296
+    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT_SIZE: 10
+    FONT_COLOR: 100, 116, 139
+    BACKGROUND_IMAGE: background.png
+  AC_LABEL:
+    TEXT: "AIRE ACONDICIONADO"
+    X: 160
+    Y: 342
+    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT_SIZE: 9
+    FONT_COLOR: 100, 116, 139
+    BACKGROUND_IMAGE: background.png
+    ANCHOR: mt
+    ALIGN: center
+
+STATS:
+  CPU:
+    PERCENTAGE:
+      INTERVAL: 1
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 70
+        Y: 248
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 0, 212, 255
+        BACKGROUND_IMAGE: background.png
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    TEMPERATURE:
+      INTERVAL: 5
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 130
+        Y: 248
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 0, 212, 255
+        BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    FREQUENCY:
+      INTERVAL: 1
+      TEXT:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    FAN_SPEED:
+      TEXT:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    POWER:
+      INTERVAL: 1
+      TEXT:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    LOAD:
+      INTERVAL: 0
+      ONE:
+        TEXT:
+          SHOW: False
+      FIVE:
+        TEXT:
+          SHOW: False
+      FIFTEEN:
+        TEXT:
+          SHOW: False
+  GPU:
+    INTERVAL: 1
+    PERCENTAGE:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 70
+        Y: 272
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 34, 197, 94
+        BACKGROUND_IMAGE: background.png
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    TEMPERATURE:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 130
+        Y: 272
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 34, 197, 94
+        BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    MEMORY:
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      TEXT:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    MEMORY_PERCENT:
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      TEXT:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    MEMORY_USED:
+      TEXT:
+        SHOW: False
+    MEMORY_TOTAL:
+      TEXT:
+        SHOW: False
+    FPS:
+      TEXT:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    FAN_SPEED:
+      TEXT:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    FREQUENCY:
+      TEXT:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    POWER:
+      TEXT:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+  MEMORY:
+    INTERVAL: 2
+    VIRTUAL:
+      USED:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 70
+        Y: 296
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 255, 200, 0
+        BACKGROUND_IMAGE: background.png
+      TOTAL:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 130
+        Y: 296
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 180, 140, 0
+        BACKGROUND_IMAGE: background.png
+      PERCENT_TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 200
+        Y: 296
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 255, 200, 0
+        BACKGROUND_IMAGE: background.png
+        ALIGN: right
+      GRAPH:
+        SHOW: False
+      FREE:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    SWAP:
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+  WEATHER:
+    INTERVAL: 300
+    TEMPERATURE:
+      TEXT:
+        SHOW: False
+    WEATHER_DESCRIPTION:
+      TEXT:
+        SHOW: True
+        X: 160
+        Y: 122
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 100, 116, 139
+        BACKGROUND_IMAGE: background.png
+        ANCHOR: mt
+        ALIGN: center
+    TEMPERATURE_FELT:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 80
+        Y: 100
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 13
+        FONT_COLOR: 0, 212, 255
+        BACKGROUND_IMAGE: background.png
+        ANCHOR: mt
+        ALIGN: center
+    HUMIDITY:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 240
+        Y: 100
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 13
+        FONT_COLOR: 0, 212, 255
+        BACKGROUND_IMAGE: background.png
+        ANCHOR: mt
+        ALIGN: center
+    UPDATE_TIME:
+      TEXT:
+        SHOW: False
+  NET:
+    INTERVAL: 3
+    WLO:
+      DOWNLOAD:
+        TEXT:
+          SHOW: False
+        LINE_GRAPH:
+          SHOW: False
+      UPLOAD:
+        TEXT:
+          SHOW: False
+        LINE_GRAPH:
+          SHOW: False
+      UPLOADED:
+        TEXT:
+          SHOW: False
+      DOWNLOADED:
+        TEXT:
+          SHOW: False
+    ETH:
+      DOWNLOAD:
+        TEXT:
+          SHOW: False
+        LINE_GRAPH:
+          SHOW: False
+      UPLOAD:
+        TEXT:
+          SHOW: False
+        LINE_GRAPH:
+          SHOW: False
+      UPLOADED:
+        TEXT:
+          SHOW: False
+      DOWNLOADED:
+        TEXT:
+          SHOW: False
+  DATE:
+    INTERVAL: 60
+    DAY:
+      TEXT:
+        SHOW: True
+        X: 20
+        Y: 465
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 12
+        FONT_COLOR: 130, 150, 175
+        BACKGROUND_IMAGE: background.png
+        WIDTH: 160
+        ANCHOR: lb
+    HOUR:
+      TEXT:
+        SHOW: True
+        X: 300
+        Y: 474
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 12
+        FONT_COLOR: 130, 150, 175
+        BACKGROUND_IMAGE: background.png
+        ANCHOR: rb
+        FORMAT: H:mm
+  DISK:
+    SHOW: False
+  UPTIME:
+    INTERVAL: 60
+    FORMATTED:
+      TEXT:
+        SHOW: True
+        X: 160
+        Y: 444
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 10
+        FONT_COLOR: 90, 110, 130
+        BACKGROUND_IMAGE: background.png
+        ANCHOR: mt
+        ALIGN: center
+  CUSTOM:
+    INTERVAL: 30
+    MideaACOutdoorTemp:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: False
+        X: 160
+        Y: 22
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 52
+        FONT_COLOR: 0, 212, 255
+        BACKGROUND_IMAGE: background.png
+        ANCHOR: mt
+        ALIGN: center
+    MideaACIndoorTemp:
+      TEXT:
+        SHOW: True
+        X: 160
+        Y: 368
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 28
+        FONT_COLOR: 0, 212, 255
+        BACKGROUND_IMAGE: background.png
+        ANCHOR: mt
+        ALIGN: center
+    MideaACMode:
+      TEXT:
+        SHOW: True
+        X: 105
+        Y: 406
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 12
+        FONT_COLOR: 0, 212, 255
+        BACKGROUND_IMAGE: background.png
+        ANCHOR: mt
+        ALIGN: center
+    MideaACTargetTemp:
+      TEXT:
+        SHOW: True
+        X: 215
+        Y: 406
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 12
+        FONT_COLOR: 0, 212, 255
+        BACKGROUND_IMAGE: background.png
+        ANCHOR: mt
+        ALIGN: center
+    MideaACPower:
+      TEXT:
+        SHOW: True
+        X: 160
+        Y: 426
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 34, 197, 94
+        BACKGROUND_IMAGE: background.png
+        ANCHOR: mt
+        ALIGN: center
+    SolarGeneration:
+      TEXT:
+        SHOW: True
+        X: 80
+        Y: 160
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 16
+        FONT_COLOR: 255, 200, 0
+        BACKGROUND_IMAGE: background.png
+        ANCHOR: mt
+        ALIGN: center
+    SolarConsumption:
+      TEXT:
+        SHOW: True
+        X: 240
+        Y: 160
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 16
+        FONT_COLOR: 34, 197, 94
+        BACKGROUND_IMAGE: background.png
+        ANCHOR: mt
+        ALIGN: center
+    SolarSurplus:
+      TEXT:
+        SHOW: True
+        X: 80
+        Y: 208
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 14
+        FONT_COLOR: 255, 200, 0
+        BACKGROUND_IMAGE: background.png
+        ANCHOR: mt
+        ALIGN: center
+    SolarMoney:
+      TEXT:
+        SHOW: True
+        X: 240
+        Y: 208
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 14
+        FONT_COLOR: 34, 197, 94
+        BACKGROUND_IMAGE: background.png
+        ANCHOR: mt
+        ALIGN: center
+  PING:
+    SHOW: False

@@ -50,6 +50,8 @@ try:
     from library.log import logger
     import library.scheduler as scheduler
     from library.display import display
+    import library.rtss_osd as rtss
+    import library.config as config
 
 except Exception as e:
     print("""Import error: %s
@@ -283,6 +285,12 @@ if __name__ == "__main__":
                                            0,
                                            hinst,
                                            None)
+            game_mode = False
+            game_check_counter = 0
+            no_game_counter = 0
+            ORIGINAL_THEME = config.CONFIG_DATA['config']['THEME']
+            AUTO_SWITCH_ENABLED = (ORIGINAL_THEME != "GamingOverlay")
+
             while True:
                 # Receive and dispatch window messages
                 win32gui.PumpWaitingMessages()
@@ -295,6 +303,36 @@ if __name__ == "__main__":
                     except:
                         pass
                     clean_stop()
+
+                # Game detection via RTSS: when FPS > 0 a game is running
+                if AUTO_SWITCH_ENABLED:
+                    fps_val = rtss.read_fps()
+                    if fps_val > 0:
+                        game_check_counter += 1
+                        no_game_counter = 0
+                        if game_check_counter >= 3 and not game_mode:
+                            game_mode = True
+                            logger.info("Game detected - switching to GamingOverlay")
+                            config.CONFIG_DATA['config']['THEME'] = "GamingOverlay"
+                            config.load_theme()
+                            display.display_static_images()
+                            display.display_static_text()
+                            stats.Gpu.stats()
+                            stats.Custom.stats()
+                            stats.Weather.stats()
+                    elif game_mode:
+                        no_game_counter += 1
+                        game_check_counter = 0
+                        if no_game_counter >= 6:
+                            game_mode = False
+                            logger.info("Game ended - switching back to normal theme")
+                            config.CONFIG_DATA['config']['THEME'] = ORIGINAL_THEME
+                            config.load_theme()
+                            display.display_static_images()
+                            display.display_static_text()
+                            stats.Weather.stats()
+                            stats.Custom.stats()
+                            stats.SystemUptime.stats()
 
                 time.sleep(0.5)
 

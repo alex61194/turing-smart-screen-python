@@ -145,3 +145,8 @@ tmp
 
 version.txt
 external/LibreHardwareMonitor/LibreHardwareMonitorLib.sys
+
+# Credentials and secrets
+*_credentials.json
+*.pem
+

@@ -55,7 +55,7 @@ STATS:
       TEXT:
         SHOW: True
         SHOW_UNIT: True
-        X: 175
+        X: 160
         Y: 5
         FONT: generale-mono/GeneraleMonoA.ttf
         FONT_SIZE: 32

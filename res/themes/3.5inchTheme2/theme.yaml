@@ -72,6 +72,51 @@ STATS:
         FONT_SIZE: 30
         FONT_COLOR: 255, 255, 255
         BACKGROUND_COLOR: 132, 154, 165
+    POWER:
+      INTERVAL: 5
+      TEXT:
+        SHOW: False
+        SHOW_UNIT: True
+        X: 320
+        Y: 500
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 10
+        FONT_COLOR: 0, 0, 0
+        BACKGROUND_COLOR: 10, 10, 15
+      LINE_GRAPH:
+        SHOW: False
+        HISTORY_SIZE: 50
+    FAN_SPEED:
+      INTERVAL: 5
+      TEXT:
+        SHOW: False
+        SHOW_UNIT: True
+        X: 320
+        Y: 500
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 10
+        FONT_COLOR: 0, 0, 0
+        BACKGROUND_COLOR: 10, 10, 15
+      GRAPH:
+        SHOW: False
+        X: 0
+        Y: 0
+        WIDTH: 1
+        HEIGHT: 1
+        MIN_VALUE: 0
+        MAX_VALUE: 100
+        BAR_COLOR: 0, 0, 0
+        BAR_OUTLINE: False
+        BACKGROUND_COLOR: 0, 0, 0
+      RADIAL:
+        SHOW: False
+        X: 0
+        Y: 0
+        RADIUS: 1
+        WIDTH: 1
+      LINE_GRAPH:
+        SHOW: False
+        HISTORY_SIZE: 50
     TEMPERATURE:
       INTERVAL: 5
       TEXT:
@@ -202,6 +247,52 @@ STATS:
         FONT_COLOR: 255, 255, 255
         BACKGROUND_COLOR: 132, 154, 165
 
+  NET:
+    INTERVAL: 3
+    WLO:
+      DOWNLOAD:
+        TEXT:
+          SHOW: False
+          SHOW_UNIT: True
+          X: 320
+          Y: 500
+          FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+          FONT_SIZE: 10
+          FONT_COLOR: 0, 0, 0
+          BACKGROUND_COLOR: 10, 10, 15
+        LINE_GRAPH:
+          SHOW: False
+      UPLOAD:
+        TEXT:
+          SHOW: False
+          SHOW_UNIT: True
+          X: 320
+          Y: 500
+          FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+          FONT_SIZE: 10
+          FONT_COLOR: 0, 0, 0
+          BACKGROUND_COLOR: 10, 10, 15
+        LINE_GRAPH:
+          SHOW: False
+      UPLOADED:
+        TEXT:
+          SHOW: False
+      DOWNLOADED:
+        TEXT:
+          SHOW: False
+    ETH:
+      UPLOAD:
+        TEXT:
+          SHOW: False
+      DOWNLOAD:
+        TEXT:
+          SHOW: False
+      UPLOADED:
+        TEXT:
+          SHOW: False
+      DOWNLOADED:
+        TEXT:
+          SHOW: False
   DATE:
     INTERVAL: 1
     DAY:

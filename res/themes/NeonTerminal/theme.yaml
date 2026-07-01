@@ -1,0 +1,359 @@
+---
+author: "@alex61194 — NeonTerminal (inspired by SapphireTheme)"
+
+display:
+  DISPLAY_SIZE: 3.5"
+  DISPLAY_ORIENTATION: portrait
+  DISPLAY_RGB_LED: 110, 13, 208
+
+static_images:
+  BACKGROUND:
+    PATH: background.png
+    X: 0
+    Y: 0
+    WIDTH: 320
+    HEIGHT: 480
+
+STATS:
+  CPU:
+    PERCENTAGE:
+      INTERVAL: 1
+      RADIAL:
+        SHOW: True
+        X: 85
+        Y: 130
+        RADIUS: 65
+        WIDTH: 20
+        MIN_VALUE: 0
+        MAX_VALUE: 100
+        ANGLE_START: 135
+        ANGLE_END: 405
+        ANGLE_STEPS: 20
+        ANGLE_SEP: 0
+        CLOCKWISE: True
+        BAR_COLOR: 57, 255, 20
+        BAR_BACKGROUND_COLOR: 15, 50, 10
+        DRAW_BAR_BACKGROUND: True
+        BAR_DECORATION: Ellipse
+        SHOW_TEXT: True
+        SHOW_UNIT: True
+        FONT: roboto/Roboto-Bold.ttf
+        FONT_SIZE: 28
+        FONT_COLOR: 57, 255, 20
+        BACKGROUND_IMAGE: background.png
+        TEXT_OFFSET: [0, -5]
+      TEXT:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    FREQUENCY:
+      INTERVAL: 1
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 170
+        Y: 34
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 16
+        FONT_COLOR: 238, 238, 238
+        BACKGROUND_IMAGE: background.png
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    TEMPERATURE:
+      INTERVAL: 1
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 170
+        Y: 68
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 24
+        FONT_COLOR: 248, 149, 4
+        BACKGROUND_IMAGE: background.png
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    LOAD:
+      INTERVAL: 0
+      ONE:
+        TEXT:
+          SHOW: False
+      FIVE:
+        TEXT:
+          SHOW: False
+      FIFTEEN:
+        TEXT:
+          SHOW: False
+    FAN_SPEED:
+      INTERVAL: 1
+      RADIAL:
+        SHOW: True
+        X: 85
+        Y: 195
+        RADIUS: 16
+        WIDTH: 6
+        MIN_VALUE: 0
+        MAX_VALUE: 100
+        ANGLE_START: 220
+        ANGLE_END: 220
+        ANGLE_STEPS: 10
+        ANGLE_SEP: 0
+        CLOCKWISE: True
+        BAR_COLOR: 248, 149, 4
+        BAR_BACKGROUND_COLOR: 60, 35, 10
+        DRAW_BAR_BACKGROUND: True
+        SHOW_TEXT: True
+        SHOW_UNIT: True
+        FONT: roboto/Roboto-Bold.ttf
+        FONT_SIZE: 9
+        FONT_COLOR: 248, 149, 4
+        BACKGROUND_IMAGE: background.png
+      TEXT:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    POWER:
+      INTERVAL: 1
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: False
+        X: 170
+        Y: 106
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 16
+        FONT_COLOR: 57, 255, 20
+        BACKGROUND_IMAGE: background.png
+      LINE_GRAPH:
+        SHOW: False
+  GPU:
+    INTERVAL: 1
+    PERCENTAGE:
+      RADIAL:
+        SHOW: True
+        X: 85
+        Y: 355
+        RADIUS: 65
+        WIDTH: 20
+        MIN_VALUE: 0
+        MAX_VALUE: 100
+        ANGLE_START: 135
+        ANGLE_END: 405
+        ANGLE_STEPS: 20
+        ANGLE_SEP: 0
+        CLOCKWISE: True
+        BAR_COLOR: 110, 13, 208
+        BAR_BACKGROUND_COLOR: 30, 4, 55
+        DRAW_BAR_BACKGROUND: True
+        BAR_DECORATION: Ellipse
+        SHOW_TEXT: True
+        SHOW_UNIT: True
+        FONT: roboto/Roboto-Bold.ttf
+        FONT_SIZE: 28
+        FONT_COLOR: 238, 238, 238
+        BACKGROUND_IMAGE: background.png
+        TEXT_OFFSET: [0, -5]
+      TEXT:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    MEMORY:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 170
+        Y: 266
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 14
+        FONT_COLOR: 238, 238, 238
+        BACKGROUND_IMAGE: background.png
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+    MEMORY_PERCENT:
+      GRAPH:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      TEXT:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    MEMORY_USED:
+      TEXT:
+        SHOW: False
+    MEMORY_TOTAL:
+      TEXT:
+        SHOW: False
+    TEMPERATURE:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 170
+        Y: 300
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 24
+        FONT_COLOR: 248, 149, 4
+        BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    FPS:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: False
+        X: 170
+        Y: 406
+        MIN_SIZE: 4
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 20
+        FONT_COLOR: 57, 255, 20
+        BACKGROUND_IMAGE: background.png
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    FAN_SPEED:
+      RADIAL:
+        SHOW: True
+        X: 85
+        Y: 420
+        RADIUS: 16
+        WIDTH: 6
+        MIN_VALUE: 0
+        MAX_VALUE: 100
+        ANGLE_START: 220
+        ANGLE_END: 220
+        ANGLE_STEPS: 10
+        ANGLE_SEP: 0
+        CLOCKWISE: False
+        BAR_COLOR: 248, 149, 4
+        BAR_BACKGROUND_COLOR: 60, 35, 10
+        DRAW_BAR_BACKGROUND: True
+        SHOW_TEXT: True
+        SHOW_UNIT: True
+        FONT: roboto/Roboto-Bold.ttf
+        FONT_SIZE: 9
+        FONT_COLOR: 248, 149, 4
+        BACKGROUND_IMAGE: background.png
+      TEXT:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    FREQUENCY:
+      TEXT:
+        SHOW: False
+      RADIAL:
+        SHOW: False
+      GRAPH:
+        SHOW: False
+      LINE_GRAPH:
+        SHOW: False
+    POWER:
+      TEXT:
+        SHOW: True
+        SHOW_UNIT: False
+        X: 170
+        Y: 338
+        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        FONT_SIZE: 16
+        FONT_COLOR: 57, 255, 20
+        BACKGROUND_IMAGE: background.png
+      LINE_GRAPH:
+        SHOW: False
+  MEMORY:
+    INTERVAL: 2
+    VIRTUAL:
+      GRAPH:
+        SHOW: True
+        X: 12
+        Y: 470
+        WIDTH: 188
+        HEIGHT: 6
+        MIN_VALUE: 0
+        MAX_VALUE: 100
+        BAR_COLOR: 110, 13, 208
+        BAR_OUTLINE: False
+        BACKGROUND_IMAGE: background.png
+      USED:
+        SHOW: False
+      FREE:
+        SHOW: False
+      PERCENT_TEXT:
+        SHOW: True
+        SHOW_UNIT: True
+        X: 210
+        Y: 464
+        FONT: roboto/Roboto-Bold.ttf
+        FONT_SIZE: 14
+        FONT_COLOR: 110, 13, 208
+        BACKGROUND_IMAGE: background.png
+  NET:
+    INTERVAL: 1
+    ETH:
+      UPLOAD:
+        TEXT:
+          SHOW: False
+        LINE_GRAPH:
+          SHOW: False
+      DOWNLOAD:
+        TEXT:
+          SHOW: False
+        LINE_GRAPH:
+          SHOW: False
+    WLO:
+      UPLOAD:
+        TEXT:
+          SHOW: False
+        LINE_GRAPH:
+          SHOW: False
+      DOWNLOAD:
+        TEXT:
+          SHOW: False
+        LINE_GRAPH:
+          SHOW: False
+  DATE:
+    INTERVAL: 1
+    DAY:
+      TEXT:
+        SHOW: False
+    HOUR:
+      TEXT:
+        SHOW: False
+  WEATHER:
+    INTERVAL: 300
+    TEMPERATURE:
+      TEXT:
+        SHOW: False
+    HUMIDITY:
+      TEXT:
+        SHOW: false
+    WEATHER_DESCRIPTION:
+      TEXT:
+        SHOW: false
+    TEMPERATURE_FELT:
+      TEXT:
+        SHOW: false
+    UPDATE_TIME:
+      TEXT:
+        SHOW: false

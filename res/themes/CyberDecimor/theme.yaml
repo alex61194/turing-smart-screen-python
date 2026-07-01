@@ -121,9 +121,11 @@ STATS:
         TEXT:
           SHOW: False
     FAN_SPEED:
-      INTERVAL: 0
+      INTERVAL: 5
       TEXT:
         SHOW: False
+        X: 320
+        Y: 500
       RADIAL:
         SHOW: False
       GRAPH:
@@ -302,6 +304,58 @@ STATS:
         FONT_SIZE: 40
         FONT_COLOR: 50, 216, 243
         BACKGROUND_IMAGE: background.png
+  NET:
+    INTERVAL: 3
+    WLO:
+      DOWNLOAD:
+        TEXT:
+          SHOW: False
+          X: 320
+          Y: 500
+        LINE_GRAPH:
+          SHOW: False
+      UPLOAD:
+        TEXT:
+          SHOW: False
+          X: 320
+          Y: 500
+        LINE_GRAPH:
+          SHOW: False
+      UPLOADED:
+        TEXT:
+          SHOW: False
+          X: 320
+          Y: 500
+      DOWNLOADED:
+        TEXT:
+          SHOW: False
+          X: 320
+          Y: 500
+    ETH:
+      DOWNLOAD:
+        TEXT:
+          SHOW: False
+          X: 320
+          Y: 500
+        LINE_GRAPH:
+          SHOW: False
+      UPLOAD:
+        TEXT:
+          SHOW: False
+          X: 320
+          Y: 500
+        LINE_GRAPH:
+          SHOW: False
+      UPLOADED:
+        TEXT:
+          SHOW: False
+          X: 320
+          Y: 500
+      DOWNLOADED:
+        TEXT:
+          SHOW: False
+          X: 320
+          Y: 500
   DATE:
     INTERVAL: 1
     DAY:
