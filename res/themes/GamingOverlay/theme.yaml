@@ -148,12 +148,13 @@ STATS:
       TEXT:
         SHOW: true
         SHOW_UNIT: true
-        X: 110
-        Y: 193
+        X: 200
+        Y: 224
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
-        FONT_SIZE: 12
+        FONT_SIZE: 11
         FONT_COLOR: 139, 233, 253
         BACKGROUND_IMAGE: background.png
+        ALIGN: right
       GRAPH:
         SHOW: true
         X: 28
@@ -178,10 +179,24 @@ STATS:
         SHOW: false
     MEMORY_USED:
       TEXT:
-        SHOW: false
+        SHOW: true
+        SHOW_UNIT: true
+        X: 28
+        Y: 224
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 139, 233, 253
+        BACKGROUND_IMAGE: background.png
     MEMORY_TOTAL:
       TEXT:
-        SHOW: false
+        SHOW: true
+        SHOW_UNIT: true
+        X: 100
+        Y: 224
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 139, 233, 253
+        BACKGROUND_IMAGE: background.png
     FAN_SPEED:
       TEXT:
         SHOW: false

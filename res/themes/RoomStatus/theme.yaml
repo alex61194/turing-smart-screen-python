@@ -241,15 +241,36 @@ STATS:
       RADIAL:
         SHOW: False
       TEXT:
-        SHOW: False
+        SHOW: True
+        SHOW_UNIT: True
+        X: 200
+        Y: 286
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 139, 233, 253
+        BACKGROUND_IMAGE: background.png
       LINE_GRAPH:
         SHOW: False
     MEMORY_USED:
       TEXT:
-        SHOW: False
+        SHOW: True
+        SHOW_UNIT: True
+        X: 70
+        Y: 286
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 139, 233, 253
+        BACKGROUND_IMAGE: background.png
     MEMORY_TOTAL:
       TEXT:
-        SHOW: False
+        SHOW: True
+        SHOW_UNIT: True
+        X: 130
+        Y: 286
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 139, 233, 253
+        BACKGROUND_IMAGE: background.png
     FPS:
       TEXT:
         SHOW: False
