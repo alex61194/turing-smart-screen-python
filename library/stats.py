@@ -79,7 +79,7 @@ elif HW_SENSORS == "STATIC":
     import library.sensors.sensors_stub_static as sensors
 elif HW_SENSORS == "AUTO":
     if platform.system() == 'Windows':
-        import library.sensors.sensors_librehardwaremonitor as sensors
+        import library.sensors.sensors_mahm as sensors
     else:
         import library.sensors.sensors_python as sensors
 else:
