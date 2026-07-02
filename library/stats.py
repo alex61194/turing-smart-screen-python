@@ -280,7 +280,7 @@ class CPU:
     # NaN reading permanently hide CPU temperature/power.
     cpu_temp_nan_count = 0
     cpu_power_nan_count = 0
-    NAN_DISABLE_THRESHOLD = 10
+    NAN_DISABLE_THRESHOLD = 20
 
     @classmethod
     def percentage(cls, forced_refresh=False):
@@ -474,7 +474,8 @@ class Gpu:
     # concluding the sensor is genuinely unsupported.
     gpu_mem_nan_count = 0
     gpu_temp_nan_count = 0
-    NAN_DISABLE_THRESHOLD = 10
+    gpu_power_nan_count = 0
+    NAN_DISABLE_THRESHOLD = 20
 
     @classmethod
     def stats(cls, forced_refresh=False):
@@ -738,11 +739,16 @@ class Gpu:
             gpu_power_line_graph_data = theme_gpu_data['POWER']['LINE_GRAPH']
 
             if math.isnan(gpu_power):
-                gpu_power = 0
-                if gpu_power_text_data['SHOW']:
-                    logger.warning("Your GPU power consumption is not supported yet")
-                    gpu_power_text_data['SHOW'] = False
-                    gpu_power_line_graph_data['SHOW'] = False
+                cls.gpu_power_nan_count += 1
+                if cls.gpu_power_nan_count >= cls.NAN_DISABLE_THRESHOLD:
+                    if gpu_power_text_data['SHOW']:
+                        logger.warning("Your GPU power consumption is not supported yet")
+                        gpu_power_text_data['SHOW'] = False
+                        gpu_power_line_graph_data['SHOW'] = False
+                prev = cls.last_values_gpu_power[-2]
+                gpu_power = 0 if math.isnan(prev) else prev
+            else:
+                cls.gpu_power_nan_count = 0
 
             display_themed_value(
                 theme_data=gpu_power_text_data,
