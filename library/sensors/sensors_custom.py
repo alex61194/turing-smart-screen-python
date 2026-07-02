@@ -408,8 +408,8 @@ class MideaACPower(_MideaACBase):
 
 class MideaACFanSpeed(_MideaACBase):
     _FAN_NAMES = {
-        0: "AUTO", 1: "BAJA", 2: "MEDIA",
-        3: "ALTA", 4: "MÁX",
+        20: "SILENCIOSO", 40: "BAJA", 60: "MEDIA",
+        80: "ALTA", 100: "MÁX", 102: "AUTO",
     }
 
     def as_numeric(self) -> float:
