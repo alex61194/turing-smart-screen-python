@@ -149,7 +149,7 @@ STATS:
         SHOW: true
         SHOW_UNIT: true
         X: 200
-        Y: 224
+        Y: 204
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 11
         FONT_COLOR: 139, 233, 253
@@ -182,7 +182,7 @@ STATS:
         SHOW: true
         SHOW_UNIT: true
         X: 28
-        Y: 224
+        Y: 204
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 11
         FONT_COLOR: 139, 233, 253
@@ -192,7 +192,7 @@ STATS:
         SHOW: true
         SHOW_UNIT: true
         X: 100
-        Y: 224
+        Y: 204
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 11
         FONT_COLOR: 139, 233, 253
