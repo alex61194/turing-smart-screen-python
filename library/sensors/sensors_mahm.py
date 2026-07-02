@@ -116,6 +116,7 @@ def _read_sources() -> Tuple[dict, dict]:
        Results are cached for _CACHE_TTL seconds within the same stats cycle.
        Returns ({}, {}) if Afterburner / shared memory isn't available.
     """
+    global _cache_ts, _cache_data
     now = time.monotonic()
     with _cache_lock:
         if now - _cache_ts < _CACHE_TTL and _cache_data[0]:
