@@ -30,7 +30,7 @@ static_text:
   VRAM_LABEL:
     TEXT: VRAM
     X: 32
-    Y: 195
+    Y: 186
     FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
     FONT_SIZE: 9
     FONT_COLOR: 98, 114, 164
@@ -149,7 +149,7 @@ STATS:
         SHOW: true
         SHOW_UNIT: true
         X: 200
-        Y: 204
+        Y: 200
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 11
         FONT_COLOR: 139, 233, 253
@@ -158,7 +158,7 @@ STATS:
       GRAPH:
         SHOW: true
         X: 28
-        Y: 212
+        Y: 216
         WIDTH: 264
         HEIGHT: 8
         MIN_VALUE: 0
@@ -182,7 +182,7 @@ STATS:
         SHOW: true
         SHOW_UNIT: true
         X: 28
-        Y: 204
+        Y: 200
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 11
         FONT_COLOR: 139, 233, 253
@@ -192,7 +192,7 @@ STATS:
         SHOW: true
         SHOW_UNIT: true
         X: 100
-        Y: 204
+        Y: 200
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 11
         FONT_COLOR: 139, 233, 253
