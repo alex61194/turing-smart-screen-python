@@ -30,6 +30,7 @@ import ctypes.wintypes
 import math
 import struct
 import threading
+import time
 from typing import Optional, Tuple
 
 import psutil
@@ -65,6 +66,14 @@ _mapping_lock = threading.Lock()
 _cached_h = None
 _cached_p = None
 
+# Per-process cache: _read_sources() is called 10+ times per stats cycle.
+# We cache the result for a short TTL so all sensor reads in the same cycle
+# use the same snapshot without re-reading shared memory.
+_cache_lock = threading.Lock()
+_cache_ts = 0.0
+_cache_data = ({}, {})
+_CACHE_TTL = 0.05  # 50ms — well under one 500ms stats cycle
+
 
 def _open_mahm():
     global _cached_h, _cached_p
@@ -83,13 +92,16 @@ def _open_mahm():
 
 
 def _invalidate_mapping():
-    global _cached_h, _cached_p
+    global _cached_h, _cached_p, _cache_ts, _cache_data
     with _mapping_lock:
         if _cached_p:
             _kernel32.UnmapViewOfFile(_cached_p)
         if _cached_h:
             _kernel32.CloseHandle(_cached_h)
         _cached_h, _cached_p = None, None
+    with _cache_lock:
+        _cache_ts = 0
+        _cache_data = ({}, {})
 
 
 def _read_cstr(base: int, offset: int) -> str:
@@ -99,10 +111,16 @@ def _read_cstr(base: int, offset: int) -> str:
 
 def _read_sources() -> Tuple[dict, dict]:
     """Reads the whole MAHM shared memory and returns:
-       - sources: {szSrcName_lower: {"data": float, "gpu": int, "units": str}}
+       - sources: {szSrcName_lower: {"data": float, "gpu": int}}
        - gpus: {gpu_index: {"device": str, "mem_total_mb": int}}
+       Results are cached for _CACHE_TTL seconds within the same stats cycle.
        Returns ({}, {}) if Afterburner / shared memory isn't available.
     """
+    now = time.monotonic()
+    with _cache_lock:
+        if now - _cache_ts < _CACHE_TTL and _cache_data[0]:
+            return _cache_data
+
     h, p = _open_mahm()
     if not p:
         return {}, {}
@@ -118,8 +136,6 @@ def _read_sources() -> Tuple[dict, dict]:
         for i in range(num_entries):
             base = p + header_size + i * entry_size
             name = _read_cstr(base, 0)
-            # Layout: szSrcName[260], szSrcUnits[260], szLocalizedSrcName[260],
-            # szLocalizedSrcUnits[260], szRecommendedFormat[260], then data/limits/flags.
             data_off = _MAX_PATH * 5
             data, min_limit, max_limit = struct.unpack_from("<3f", ctypes.string_at(base + data_off, 12), 0)
             flags, gpu_idx, src_id = struct.unpack_from("<3I", ctypes.string_at(base + data_off + 12, 12), 0)
@@ -130,10 +146,13 @@ def _read_sources() -> Tuple[dict, dict]:
         gpu_array_base = p + header_size + num_entries * entry_size
         for g in range(num_gpu):
             base = gpu_array_base + g * gpu_entry_size
-            device = _read_cstr(base, _MAX_PATH * 2)  # szGpuId, szFamily, szDevice
+            device = _read_cstr(base, _MAX_PATH * 2)
             (mem_amount,) = struct.unpack_from("<I", ctypes.string_at(base + _MAX_PATH * 5, 4), 0)
             gpus[g] = {"device": device, "mem_total_mb": mem_amount}
 
+        with _cache_lock:
+            _cache_ts = now
+            _cache_data = (sources, gpus)
         return sources, gpus
     except Exception as e:
         logger.warning("MAHM read error (Afterburner closed/restarted?): %s", e)
@@ -186,7 +205,26 @@ _GPU_MEM_PCT = ["fb usage", "Memory usage", "GPU1 memory usage"]
 _GPU_CORE_CLOCK = ["Core clock", "GPU1 core clock"]
 _GPU_POWER = ["Power", "GPU1 power", "Power consumption %"]
 _GPU_FAN = ["Fan speed", "GPU1 fan speed"]
+_GPU_MEM_CLOCK = ["Memory clock", "GPU1 memory clock"]
 _RAM_USAGE = ["RAM usage", "Physical memory usage"]
+
+
+# Fallback VRAM totals when MAHM's GPU entry reports mem_total_mb=0.
+# Keyed by substring of the device name (lowercase).
+_KNOWN_VRAM_MB = {
+    "rtx 4070": 12288,
+    "rtx 4070 super": 12288,
+    "rtx 4070 ti": 12288,
+    "rtx 4080": 16384,
+    "rtx 4090": 24576,
+    "rtx 4060": 8192,
+    "rtx 4060 ti": 8192,
+    "rtx 3090": 24576,
+    "rtx 3080": 10240,
+    "rtx 3070": 8192,
+    "rtx 3060": 12288,
+    "rtx 3060 ti": 8192,
+}
 
 
 class Cpu(sensors.Cpu):
@@ -236,9 +274,18 @@ class Gpu(sensors.Gpu):
         mem_percent = _find_gpu(sources, _GPU_MEM_PCT)
         temp = _find_gpu(sources, _GPU_TEMP)
 
+        # MAHM's GPU entry may report mem_total_mb=0 for some driver versions.
+        # Fall back to a known lookup table keyed by device name.
         total_mem_mb = math.nan
         if gpus:
-            total_mem_mb = float(gpus[min(gpus.keys())]["mem_total_mb"])
+            g0 = gpus[min(gpus.keys())]
+            total_mem_mb = float(g0["mem_total_mb"])
+            if total_mem_mb == 0:
+                dev_lower = g0.get("device", "").lower()
+                for key, mb in _KNOWN_VRAM_MB.items():
+                    if key in dev_lower:
+                        total_mem_mb = float(mb)
+                        break
         used_mem_mb = (mem_percent / 100.0 * total_mem_mb) if not math.isnan(mem_percent) and not math.isnan(
             total_mem_mb) else math.nan
 
@@ -269,6 +316,11 @@ class Gpu(sensors.Gpu):
         if not math.isnan(val) and (val < 0 or val > 1000):
             return math.nan
         return val
+
+    @staticmethod
+    def memory_clock() -> float:
+        sources, _ = _read_sources()
+        return _find_gpu(sources, _GPU_MEM_CLOCK)
 
     @staticmethod
     def is_available() -> bool:
