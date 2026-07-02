@@ -178,7 +178,14 @@ STATS:
     POWER:
       INTERVAL: 1
       TEXT:
-        SHOW: False
+        SHOW: True
+        SHOW_UNIT: True
+        X: 270
+        Y: 272
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 139, 233, 253
+        BACKGROUND_IMAGE: background.png
       LINE_GRAPH:
         SHOW: False
     LOAD:

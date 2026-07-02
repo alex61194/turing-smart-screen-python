@@ -153,6 +153,18 @@ def _find(sources: dict, candidates) -> float:
     return math.nan
 
 
+def _find_gpu(sources: dict, candidates) -> float:
+    """Like _find but only matches sources whose gpu field is a real GPU index
+    (0, 1, ...), not the sentinel 0xFFFFFFFF used for non-GPU entries.
+    This avoids e.g. "power" substring-matching "cpu power" instead of "power"."""
+    for cand in candidates:
+        cand_l = cand.lower()
+        for name, entry in sources.items():
+            if entry["gpu"] != 0xFFFFFFFF and cand_l in name:
+                return float(entry["data"])
+    return math.nan
+
+
 # Candidate names: MSI Afterburner labels vary slightly by version/language,
 # hence multiple alternatives per metric. Run debug_dump_sources() to see
 # exactly what your install exposes if a value stays stuck at NaN.
@@ -212,9 +224,9 @@ class Gpu(sensors.Gpu):
         if not sources:
             return math.nan, math.nan, math.nan, math.nan, math.nan
 
-        load = _find(sources, _GPU_USAGE)
-        mem_percent = _find(sources, _GPU_MEM_PCT)
-        temp = _find(sources, _GPU_TEMP)
+        load = _find_gpu(sources, _GPU_USAGE)
+        mem_percent = _find_gpu(sources, _GPU_MEM_PCT)
+        temp = _find_gpu(sources, _GPU_TEMP)
 
         total_mem_mb = math.nan
         if gpus:
@@ -235,17 +247,17 @@ class Gpu(sensors.Gpu):
     @staticmethod
     def fan_percent() -> float:
         sources, _ = _read_sources()
-        return _find(sources, _GPU_FAN)
+        return _find_gpu(sources, _GPU_FAN)
 
     @staticmethod
     def frequency() -> float:
         sources, _ = _read_sources()
-        return _find(sources, _GPU_CORE_CLOCK)
+        return _find_gpu(sources, _GPU_CORE_CLOCK)
 
     @staticmethod
     def power() -> float:
         sources, _ = _read_sources()
-        val = _find(sources, _GPU_POWER)
+        val = _find_gpu(sources, _GPU_POWER)
         if not math.isnan(val) and (val < 0 or val > 1000):
             return math.nan
         return val
