@@ -65,6 +65,18 @@ static_text:
     BACKGROUND_IMAGE: background.png
     ANCHOR: mt
     ALIGN: center
+  MONEY_LABEL:
+    TEXT: "AHORRO"
+    X: 215
+    Y: 190
+    WIDTH: 50
+    HEIGHT: 10
+    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT_SIZE: 8
+    FONT_COLOR: 98, 114, 164
+    BACKGROUND_IMAGE: background.png
+    ANCHOR: mt
+    ALIGN: center
   SURPLUS_LABEL:
     TEXT: "EXCEDENTE"
     X: 80
@@ -75,16 +87,7 @@ static_text:
     BACKGROUND_IMAGE: background.png
     ANCHOR: mt
     ALIGN: center
-  MONEY_LABEL:
-    TEXT: "AHORRO"
-    X: 240
-    Y: 190
-    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
-    FONT_SIZE: 8
-    FONT_COLOR: 98, 114, 164
-    BACKGROUND_IMAGE: background.png
-    ANCHOR: mt
-    ALIGN: center
+
   CPU_LABEL:
     TEXT: "CPU"
     X: 20

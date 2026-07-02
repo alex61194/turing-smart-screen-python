@@ -99,7 +99,7 @@ def get_theme_file_path(name):
         return None
 
 
-def display_themed_value(theme_data, value, min_size=0, unit=''):
+def display_themed_value(theme_data, value, min_size=0, unit='', font_color=None):
     if not theme_data.get("SHOW", False):
         return
 
@@ -113,6 +113,9 @@ def display_themed_value(theme_data, value, min_size=0, unit=''):
     if theme_data.get("SHOW_UNIT", True) and unit:
         text += str(unit)
 
+    if font_color is None:
+        font_color = theme_data.get("FONT_COLOR", (0, 0, 0))
+
     display.lcd.DisplayText(
         text=text,
         x=theme_data.get("X", 0),
@@ -121,7 +124,7 @@ def display_themed_value(theme_data, value, min_size=0, unit=''):
         height=theme_data.get("HEIGHT", 0),
         font=config.FONTS_DIR + theme_data.get("FONT", "roboto-mono/RobotoMono-Regular.ttf"),
         font_size=theme_data.get("FONT_SIZE", 10),
-        font_color=theme_data.get("FONT_COLOR", (0, 0, 0)),
+        font_color=font_color,
         background_color=theme_data.get("BACKGROUND_COLOR", (255, 255, 255)),
         background_image=get_theme_file_path(theme_data.get("BACKGROUND_IMAGE", None)),
         align=theme_data.get("ALIGN", "left"),
@@ -1008,7 +1011,41 @@ class Custom:
                 # Display text
                 theme_data = config.THEME_DATA['STATS']['CUSTOM'][custom_stat].get("TEXT", None)
                 if theme_data is not None and string_value is not None:
-                    display_themed_value(theme_data=theme_data, value=string_value)
+                    # Color condicional: rojo cuando AC apagado o excedente negativo
+                    override_color = None
+                    if custom_stat == "MideaACPower" and numeric_value == 0.0:
+                        override_color = (255, 50, 50)
+                    elif custom_stat == "SolarMoney":
+                        # Alternar AHORRO/GASTO segun excedente
+                        money_lbl = config.THEME_DATA['static_text'].get('MONEY_LABEL', {})
+                        if money_lbl and numeric_value is not None:
+                            if numeric_value < 0:
+                                override_color = (255, 50, 50)
+                                label_text = "GASTO"
+                                label_color = money_lbl.get("FONT_COLOR", (98, 114, 164))
+                            else:
+                                label_text = "AHORRO"
+                                label_color = money_lbl.get("FONT_COLOR", (98, 114, 164))
+                                override_color = None
+                            display.lcd.DisplayText(
+                                text=label_text,
+                                x=money_lbl.get("X", 0),
+                                y=money_lbl.get("Y", 0),
+                                width=money_lbl.get("WIDTH", 0),
+                                height=money_lbl.get("HEIGHT", 0),
+                                font=config.FONTS_DIR + money_lbl.get("FONT",
+                                                                       "roboto-mono/RobotoMono-Regular.ttf"),
+                                font_size=money_lbl.get("FONT_SIZE", 10),
+                                font_color=label_color,
+                                background_color=money_lbl.get("BACKGROUND_COLOR", (255, 255, 255)),
+                                background_image=get_theme_file_path(
+                                    money_lbl.get("BACKGROUND_IMAGE", None)),
+                                align=money_lbl.get("ALIGN", "left"),
+                                anchor=money_lbl.get("ANCHOR", "lt"),
+                            )
+
+                    display_themed_value(theme_data=theme_data, value=string_value,
+                                         font_color=override_color)
 
                 # Display graph from numeric value
                 theme_data = config.THEME_DATA['STATS']['CUSTOM'][custom_stat].get("GRAPH", None)

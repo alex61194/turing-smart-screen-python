@@ -114,6 +114,7 @@ import json
 import logging
 import os
 import threading
+from collections import deque
 
 _AC_LOGGER = logging.getLogger(__name__)
 
@@ -175,10 +176,12 @@ class _MideaACMonitor:
         }
         self._cache_lock = threading.Lock()
         self._ready = threading.Event()
-        # Estado para el calculo de potencia derivada.
-        self._prev_total_energy = None
-        self._prev_energy_ts = None
-        self._accum_ts = None
+        # Ring buffer de potencia instantanea por tick.
+        # Cada vez que el contador salta, calculamos W = delta_kWh * 3.6e6 / delta_s
+        # y guardamos en un buffer de las ultimas N lecturas para suavizar.
+        self._tick_powers = deque(maxlen=3)
+        self._last_total = None
+        self._last_tick_ts = None
         self._power_w = 0.0
         self._zero_since = None  # timestamp: desde cuando el AC lleva en 0 W
 
@@ -211,59 +214,45 @@ class _MideaACMonitor:
                             rt_power, total, device.get_current_energy_usage())
             self._cache["real_time_power"] = rt_power
 
-            # --- Potencia derivada (W) a partir del contador acumulado ---
-            # El contador del AC avanza en saltos discretos (~10 Wh), asi que
-            # usamos una ventana deslizante: acumulamos tiempo/energia hasta el
-            # proximo salto del contador, calculamos la media, y repetimos.
+            # --- Potencia derivada (W) por tick con buffer suavizador ---
+            # El contador avanza en saltos de 0.01 kWh. En cada salto
+            # calculamos la potencia instantanea del intervalo y la
+            # promediamos con las ultimas N lecturas de tick para
+            # obtener un valor estable que converge a la media real.
             now = _time.time()
             if not power_on:
                 self._cache["derived_power_w"] = 0.0
                 self._power_w = 0.0
                 self._zero_since = now
-                self._prev_total_energy = total
-                self._prev_energy_ts = now
-                self._accum_ts = None
+                self._tick_powers.clear()
+                self._last_total = None
+                self._last_tick_ts = None
             else:
-                # AC encendido: al primer refresh tras encendido, inicializamos.
-                if self._accum_ts is None:
-                    self._accum_ts = now
-                    self._prev_total_energy = total
-                    self._prev_energy_ts = now
-                    # Si habia un valor previo valido, lo mostramos mientras
-                    # el contador arranca; si no, 0 es correcto.
-                    self._cache["derived_power_w"] = self._power_w
+                if total is not None and self._last_total is not None:
+                    delta = total - self._last_total
+                    if delta > 0 and self._last_tick_ts is not None:
+                        dt = now - self._last_tick_ts
+                        if dt > 0:
+                            inst_w = max(0.0, round(
+                                delta * 3600.0 * 1000.0 / dt))
+                            self._tick_powers.append(inst_w)
+                            self._power_w = round(
+                                sum(self._tick_powers) / len(self._tick_powers))
+                            self._zero_since = None
+                        self._last_tick_ts = now
+                elif total is not None and self._last_total is None:
+                    self._last_tick_ts = now  # primera lectura: fijamos linea de base
 
-                # Incremento del contador desde la lectura anterior.
-                if total is not None and self._prev_total_energy is not None:
-                    delta = total - self._prev_total_energy
-                    if delta > 0:
-                        # El contador salto: calcular potencia media de esta
-                        # ventana y reiniciar.
-                        window_dt = now - self._accum_ts
-                        if window_dt > 0:
-                            self._power_w = max(0.0, round(
-                                delta * 3600.0 * 1000.0 / window_dt))
-                            self._cache["derived_power_w"] = self._power_w
-                            self._zero_since = None  # hay consumo
-                        self._accum_ts = now
-                    else:
-                        # delta == 0: el contador aun no avanzo. Si llevamos mas de
-                        # 90 s sin consumo, forzamos 0 (compresor parado por termostato).
-                        if (self._zero_since is None
-                                and self._power_w > 0
-                                and (now - self._accum_ts) > 90):
-                            self._power_w = 0.0
-                            self._cache["derived_power_w"] = 0.0
-                            self._zero_since = now
-                            # Reiniciar tambien el inicio de la ventana: si no,
-                            # la proxima vez que el contador avance, window_dt
-                            # incluira todo este tiempo inactivo y diluira el
-                            # calculo, mostrando una potencia artificialmente
-                            # baja en el primer salto tras la inactividad.
-                            self._accum_ts = now
+                self._last_total = total
 
-                self._prev_total_energy = total
-                self._prev_energy_ts = now
+                # Si llevamos mas de 180s sin tick, el compresor se paro
+                if (self._power_w > 0 and self._last_tick_ts is not None
+                        and (now - self._last_tick_ts) > 180):
+                    self._power_w = 0.0
+                    self._zero_since = now
+                    self._tick_powers.clear()
+
+                self._cache["derived_power_w"] = self._power_w
 
     def get(self, key):
         with self._cache_lock:
@@ -311,7 +300,7 @@ class _MideaACMonitor:
             except Exception as e:
                 _AC_LOGGER.warning("Midea AC refresh error: %s", e)
 
-            await asyncio.sleep(30)
+            await asyncio.sleep(10)
 
     def _run_loop(self):
         self._loop = asyncio.new_event_loop()
@@ -855,3 +844,8 @@ class SolarMoney(_FusionSolarBase):
             cost_ph = -surplus_kw * GRID_PRICE
             return f"-{cost_ph:.2f}€/h"
         return "0.00€/h"
+
+
+# Arrancar monitores al importar para que empiecen a obtener datos cuanto antes.
+_MideaACMonitor.get_instance().start()
+_FusionSolarMonitor.get_instance().start()
