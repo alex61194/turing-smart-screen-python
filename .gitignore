@@ -143,6 +143,9 @@ dmypy.json
 screencap.png
 tmp
 
+# Config with personal data (API keys, interfaces). Use config.yaml.example as template.
+config.yaml
+
 version.txt
 external/LibreHardwareMonitor/LibreHardwareMonitorLib.sys
 

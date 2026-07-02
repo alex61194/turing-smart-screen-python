@@ -62,6 +62,15 @@ elif HW_SENSORS == "LHM":
             sys.exit(0)
         except:
             os._exit(0)
+elif HW_SENSORS == "MAHM":
+    if platform.system() == 'Windows':
+        import library.sensors.sensors_mahm as sensors
+    else:
+        logger.error("MSI Afterburner MAHM integration is only available on Windows")
+        try:
+            sys.exit(0)
+        except:
+            os._exit(0)
 elif HW_SENSORS == "STUB":
     logger.warning("Stub sensors, not real HW sensors")
     import library.sensors.sensors_stub_random as sensors
@@ -267,6 +276,11 @@ class CPU:
     last_values_cpu_fan_speed = []
     last_values_cpu_frequency = []
     last_values_cpu_power = []
+    # Same rationale as Gpu.NAN_DISABLE_THRESHOLD: don't let one transient
+    # NaN reading permanently hide CPU temperature/power.
+    cpu_temp_nan_count = 0
+    cpu_power_nan_count = 0
+    NAN_DISABLE_THRESHOLD = 10
 
     @classmethod
     def percentage(cls, forced_refresh=False):
@@ -343,14 +357,19 @@ class CPU:
         cpu_temp_line_graph_data = config.THEME_DATA['STATS']['CPU']['TEMPERATURE']['LINE_GRAPH']
 
         if math.isnan(temperature):
-            temperature = 0
-            if cpu_temp_text_data['SHOW'] or cpu_temp_radial_data['SHOW'] or cpu_temp_graph_data[
-                'SHOW'] or cpu_temp_line_graph_data['SHOW']:
-                logger.warning("Your CPU temperature is not supported yet")
-                cpu_temp_text_data['SHOW'] = False
-                cpu_temp_radial_data['SHOW'] = False
-                cpu_temp_graph_data['SHOW'] = False
-                cpu_temp_line_graph_data['SHOW'] = False
+            cls.cpu_temp_nan_count += 1
+            if cls.cpu_temp_nan_count >= cls.NAN_DISABLE_THRESHOLD:
+                if cpu_temp_text_data['SHOW'] or cpu_temp_radial_data['SHOW'] or cpu_temp_graph_data[
+                    'SHOW'] or cpu_temp_line_graph_data['SHOW']:
+                    logger.warning("Your CPU temperature is not supported yet")
+                    cpu_temp_text_data['SHOW'] = False
+                    cpu_temp_radial_data['SHOW'] = False
+                    cpu_temp_graph_data['SHOW'] = False
+                    cpu_temp_line_graph_data['SHOW'] = False
+            prev = cls.last_values_cpu_temperature[-2]
+            temperature = 0 if math.isnan(prev) else prev
+        else:
+            cls.cpu_temp_nan_count = 0
 
         need_refresh = True
         if not math.isnan(cls.last_values_cpu_temperature[-2]):
@@ -413,12 +432,17 @@ class CPU:
                         theme_data['LINE_GRAPH'].get("HISTORY_SIZE", DEFAULT_HISTORY_SIZE))
 
         if math.isnan(cpu_power):
-            cpu_power = 0
+            cls.cpu_power_nan_count += 1
             cpu_power_text_data = theme_data['TEXT']
-            if cpu_power_text_data['SHOW']:
-                logger.warning("Your CPU power consumption is not supported yet")
-                cpu_power_text_data['SHOW'] = False
-                theme_data['LINE_GRAPH']['SHOW'] = False
+            if cls.cpu_power_nan_count >= cls.NAN_DISABLE_THRESHOLD:
+                if cpu_power_text_data['SHOW']:
+                    logger.warning("Your CPU power consumption is not supported yet")
+                    cpu_power_text_data['SHOW'] = False
+                    theme_data['LINE_GRAPH']['SHOW'] = False
+            prev = cls.last_values_cpu_power[-2]
+            cpu_power = 0 if math.isnan(prev) else prev
+        else:
+            cls.cpu_power_nan_count = 0
 
         display_themed_value(
             theme_data=theme_data['TEXT'],
@@ -442,6 +466,15 @@ class Gpu:
     last_values_gpu_fan_speed = []
     last_values_gpu_frequency = []
     last_values_gpu_power = []
+    # Consecutive-NaN counters: LibreHardwareMonitor/NVAPI sometimes report a
+    # single momentary NaN for VRAM% or temperature (cold start, GPU waking
+    # from an idle power state, driver hiccup) even though the sensor is
+    # perfectly supported. The stock code disabled the stat forever on the
+    # very first NaN; we now require several CONSECUTIVE misses before
+    # concluding the sensor is genuinely unsupported.
+    gpu_mem_nan_count = 0
+    gpu_temp_nan_count = 0
+    NAN_DISABLE_THRESHOLD = 10
 
     @classmethod
     def stats(cls, forced_refresh=False):
@@ -529,13 +562,19 @@ class Gpu:
         gpu_mem_percent_line_graph_data = theme_gpu_data['MEMORY_PERCENT']['LINE_GRAPH']
 
         if math.isnan(memory_percentage):
-            memory_percentage = 0
-            if gpu_mem_percent_graph_data['SHOW'] or gpu_mem_percent_radial_data['SHOW'] or gpu_mem_percent_text_data[
-                'SHOW'] or gpu_mem_percent_line_graph_data['SHOW']:
-                logger.warning("Your GPU memory relative usage (%) is not supported yet")
-                gpu_mem_percent_graph_data['SHOW'] = False
-                gpu_mem_percent_radial_data['SHOW'] = False
-                gpu_mem_percent_text_data['SHOW'] = False
+            cls.gpu_mem_nan_count += 1
+            if cls.gpu_mem_nan_count >= cls.NAN_DISABLE_THRESHOLD:
+                if gpu_mem_percent_graph_data['SHOW'] or gpu_mem_percent_radial_data['SHOW'] or gpu_mem_percent_text_data[
+                    'SHOW'] or gpu_mem_percent_line_graph_data['SHOW']:
+                    logger.warning("Your GPU memory relative usage (%) is not supported yet")
+                    gpu_mem_percent_graph_data['SHOW'] = False
+                    gpu_mem_percent_radial_data['SHOW'] = False
+                    gpu_mem_percent_text_data['SHOW'] = False
+            # Transient miss: keep showing the last good value instead of a 0% flash
+            prev = cls.last_values_gpu_mem_percentage[-2]
+            memory_percentage = 0 if math.isnan(prev) else prev
+        else:
+            cls.gpu_mem_nan_count = 0
 
         need_refresh = True
         if not math.isnan(cls.last_values_gpu_mem_percentage[-2]):
@@ -584,14 +623,20 @@ class Gpu:
         gpu_temp_line_graph_data = theme_gpu_data['TEMPERATURE']['LINE_GRAPH']
 
         if math.isnan(temperature):
-            temperature = 0
-            if gpu_temp_text_data['SHOW'] or gpu_temp_radial_data['SHOW'] or gpu_temp_graph_data[
-                'SHOW'] or gpu_temp_line_graph_data['SHOW']:
-                logger.warning("Your GPU temperature is not supported yet")
-                gpu_temp_text_data['SHOW'] = False
-                gpu_temp_radial_data['SHOW'] = False
-                gpu_temp_graph_data['SHOW'] = False
-                gpu_temp_line_graph_data['SHOW'] = False
+            cls.gpu_temp_nan_count += 1
+            if cls.gpu_temp_nan_count >= cls.NAN_DISABLE_THRESHOLD:
+                if gpu_temp_text_data['SHOW'] or gpu_temp_radial_data['SHOW'] or gpu_temp_graph_data[
+                    'SHOW'] or gpu_temp_line_graph_data['SHOW']:
+                    logger.warning("Your GPU temperature is not supported yet")
+                    gpu_temp_text_data['SHOW'] = False
+                    gpu_temp_radial_data['SHOW'] = False
+                    gpu_temp_graph_data['SHOW'] = False
+                    gpu_temp_line_graph_data['SHOW'] = False
+            # Transient miss: keep showing the last good value instead of a 0deg flash
+            prev = cls.last_values_gpu_temperature[-2]
+            temperature = 0 if math.isnan(prev) else prev
+        else:
+            cls.gpu_temp_nan_count = 0
 
         need_refresh = True
         if not math.isnan(cls.last_values_gpu_temperature[-2]):

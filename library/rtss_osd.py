@@ -1,6 +1,7 @@
 import ctypes
 import ctypes.wintypes
 import struct
+import threading
 
 _kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
 _kernel32.OpenFileMappingW.restype = ctypes.wintypes.HANDLE
@@ -14,23 +15,48 @@ _kernel32.CloseHandle.argtypes = [ctypes.wintypes.HANDLE]
 
 _last_fps = 0
 
+# Mapping cacheado: se abre una vez y se reutiliza entre llamadas (read_fps se
+# invita cada 500 ms). Se reabre solo si se invalida (RTSS reiniciado, etc.).
+_mapping_lock = threading.Lock()
+_cached_h = None
+_cached_p = None
+
+_RTSS_MAP_NAME = "RTSSSharedMemoryV2"
+_FILE_MAP_READ = 0x0004
+
 
 def _open_rtss():
-    h = _kernel32.OpenFileMappingW(0x0004, False, "RTSSSharedMemoryV2")
-    if not h:
-        return None, None
-    p = _kernel32.MapViewOfFile(h, 0x0004, 0, 0, 0)
-    if not p:
-        _kernel32.CloseHandle(h)
-        return None, None
-    return h, p
+    """Devuelve (handle, ptr) al mapping RTSS, abriéndolo si era necesario."""
+    global _cached_h, _cached_p
+    with _mapping_lock:
+        if _cached_p:
+            return _cached_h, _cached_p
+        h = _kernel32.OpenFileMappingW(_FILE_MAP_READ, False, _RTSS_MAP_NAME)
+        if not h:
+            return None, None
+        p = _kernel32.MapViewOfFile(h, _FILE_MAP_READ, 0, 0, 0)
+        if not p:
+            _kernel32.CloseHandle(h)
+            return None, None
+        _cached_h, _cached_p = h, p
+        return h, p
+
+
+def _invalidate_mapping():
+    """Cierra y descarta el mapping cacheado (tras un error de lectura)."""
+    global _cached_h, _cached_p
+    with _mapping_lock:
+        if _cached_p:
+            _kernel32.UnmapViewOfFile(_cached_p)
+        if _cached_h:
+            _kernel32.CloseHandle(_cached_h)
+        _cached_h, _cached_p = None, None
 
 
 def _close_rtss(h, p):
-    if p:
-        _kernel32.UnmapViewOfFile(p)
-    if h:
-        _kernel32.CloseHandle(h)
+    # Con el cacheo, el mapping se mantiene abierto entre llamadas; esta función
+    # ya no cierra nada, se conserva por compatibilidad con llamadas internas.
+    pass
 
 
 def read_fps() -> int:
@@ -60,8 +86,11 @@ def read_fps() -> int:
         if best_fps > 0:
             _last_fps = int(best_fps)
             return _last_fps
-    finally:
-        _close_rtss(h, p)
+    except Exception:
+        # Mapping probablemente invalidado (RTSS cerrado/reiniciado): descartar.
+        _invalidate_mapping()
+        _last_fps = 0
+        return 0
     _last_fps = 0
     return 0
 
@@ -71,7 +100,6 @@ def write_osd(text: str) -> bool:
     if not p:
         return False
     try:
-        sig = struct.unpack_from("<I", ctypes.string_at(p, 4))[0]
         osd_entry_size = struct.unpack_from("<I", ctypes.string_at(p + 20, 4))[0]
         osd_array_offset = struct.unpack_from("<I", ctypes.string_at(p + 24, 4))[0]
         osd_array_count = struct.unpack_from("<I", ctypes.string_at(p + 28, 4))[0]
@@ -89,8 +117,9 @@ def write_osd(text: str) -> bool:
             encoded = encoded[:max_bytes]
         ctypes.memmove(entry + 4, encoded, len(encoded))
         return True
-    finally:
-        _close_rtss(h, p)
+    except Exception:
+        _invalidate_mapping()
+        return False
 
 
 def clear_osd() -> bool:
@@ -99,7 +128,4 @@ def clear_osd() -> bool:
 
 def is_running() -> bool:
     h, p = _open_rtss()
-    if p:
-        _close_rtss(h, p)
-        return True
-    return False
+    return bool(p)

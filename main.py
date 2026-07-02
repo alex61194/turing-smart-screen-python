@@ -59,13 +59,13 @@ Please follow start guide to install required packages: https://github.com/matho
 Or the troubleshooting page: https://github.com/mathoudebine/turing-smart-screen-python/wiki/Troubleshooting#all-os-tkinter-dependency-not-installed""" % str(
         e))
     try:
-        sys.exit(0)
-    except:
-        os._exit(0)
+        sys.exit(1)
+    except Exception:
+        os._exit(1)
 
 try:
     import pystray
-except:
+except Exception:
     # If pystray cannot be loaded do not stop the program, just ignore it. The tray icon will not be displayed.
     pass
 
@@ -106,9 +106,11 @@ if __name__ == "__main__":
             tray_icon.visible = False
 
         # We force the exit to avoid waiting for other scheduled tasks: they may have a long delay!
+        # bare except is intentional here: we need to catch SystemExit itself raised by sys.exit(0)
+        # and force a process-level termination regardless.
         try:
             sys.exit(0)
-        except:
+        except BaseException:
             os._exit(0)
 
     def on_signal_caught(signum, frame=None):
@@ -122,7 +124,7 @@ if __name__ == "__main__":
             # Load Python file with local python interpreter (useful for venvs)
             configure_file = next(MAIN_DIRECTORY.glob("configure.py"))
             subprocess.Popen([sys.executable, str(configure_file)])
-        except:
+        except Exception:
             # Load binary (for releases) or Python file with system interpreter
             configure_file = next(MAIN_DIRECTORY.glob("configure*"))
             if platform.system() == "Windows":
@@ -191,7 +193,7 @@ if __name__ == "__main__":
         if platform.system() != "Darwin":
             tray_icon.run_detached()
             logger.info("Tray icon has been displayed")
-    except:
+    except Exception:
         tray_icon = None
         logger.warning("Tray icon is not supported on your platform")
 
@@ -255,7 +257,10 @@ if __name__ == "__main__":
         tray_icon.run()
 
     elif platform.system() == "Windows":  # Windows-specific
+        import threading
         SHUTDOWN_SIGNAL_FILE = os.path.join(MAIN_DIRECTORY, ".shutdown_signal")
+        # Protege el cambio de tema en runtime frente a lecturas del scheduler.
+        theme_switch_lock = threading.Lock()
 
         # Create a hidden window just to be able to receive window message events (for shutdown/logoff clean stop)
         hinst = win32api.GetModuleHandle(None)
@@ -300,7 +305,7 @@ if __name__ == "__main__":
                     logger.info("Shutdown requested by power handler")
                     try:
                         os.remove(SHUTDOWN_SIGNAL_FILE)
-                    except:
+                    except Exception:
                         pass
                     clean_stop()
 
@@ -313,26 +318,30 @@ if __name__ == "__main__":
                         if game_check_counter >= 3 and not game_mode:
                             game_mode = True
                             logger.info("Game detected - switching to GamingOverlay")
-                            config.CONFIG_DATA['config']['THEME'] = "GamingOverlay"
-                            config.load_theme()
-                            display.display_static_images()
-                            display.display_static_text()
-                            stats.Gpu.stats()
-                            stats.Custom.stats()
-                            stats.Weather.stats()
+                            # El lock evita que los hilos del scheduler lean THEME_DATA
+                            # a medias durante el cambio de tema.
+                            with theme_switch_lock:
+                                config.CONFIG_DATA['config']['THEME'] = "GamingOverlay"
+                                config.load_theme()
+                                display.display_static_images()
+                                display.display_static_text()
+                                stats.Gpu.stats()
+                                stats.Custom.stats()
+                                stats.Weather.stats()
                     elif game_mode:
                         no_game_counter += 1
                         game_check_counter = 0
                         if no_game_counter >= 6:
                             game_mode = False
                             logger.info("Game ended - switching back to normal theme")
-                            config.CONFIG_DATA['config']['THEME'] = ORIGINAL_THEME
-                            config.load_theme()
-                            display.display_static_images()
-                            display.display_static_text()
-                            stats.Weather.stats()
-                            stats.Custom.stats()
-                            stats.SystemUptime.stats()
+                            with theme_switch_lock:
+                                config.CONFIG_DATA['config']['THEME'] = ORIGINAL_THEME
+                                config.load_theme()
+                                display.display_static_images()
+                                display.display_static_text()
+                                stats.Weather.stats()
+                                stats.Custom.stats()
+                                stats.SystemUptime.stats()
 
                 time.sleep(0.5)
 

@@ -1,24 +1,66 @@
 #!/usr/bin/env python
-"""AC Midea Web Control - interfaz web para controlar el aire acondicionado via msmart-ng"""
+"""AC Midea Web Control - interfaz web para controlar el aire acondicionado via msmart-ng.
 
-import asyncio
+Seguridad:
+  - Todas las mutaciones (power/mode/temp/fan) se hacen por POST (CSRF-safe).
+  - Acceso protegido por token Bearer (variable de entorno AC_WEB_TOKEN).
+    Si la variable no está definida, el servidor se niega a arrancar.
+  - El bind por defecto es 127.0.0.1 (solo localhost). Para exponerlo a la LAN
+    o a un tunel, define AC_WEB_HOST=0.0.0.0 — pero SIEMPRE con un token.
+Credenciales del AC:
+  - Se leen de library/midea_ac_credentials.json por defecto, o de variables de
+    entorno (AC_IP, AC_PORT, AC_DEVICE_ID, AC_TOKEN, AC_KEY) si se prefieren.
+"""
+
 import json
 import logging
 import os
 from pathlib import Path
+from typing import Optional
 
-from fastapi import FastAPI, Query
+import secrets
+import uvicorn
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from msmart.device import AirConditioner
 
 logging.basicConfig(level=logging.INFO)
 _LOGGER = logging.getLogger("ac_web")
 
-CREDS_PATH = Path(__file__).parent / "library" / "midea_ac_credentials.json"
+BASE_DIR = Path(__file__).resolve().parent
+CREDS_PATH = BASE_DIR / "library" / "midea_ac_credentials.json"
+TEMPLATE_PATH = BASE_DIR / "templates" / "ac_index.html"
 
-app = FastAPI(title="AC Midea Control")
+# --- Authentication ---------------------------------------------------------
+# The token authorizes every API call. MUST be set via env var to start.
+AUTH_TOKEN = os.environ.get("AC_WEB_TOKEN")
+if not AUTH_TOKEN:
+    _LOGGER.error(
+        "AC_WEB_TOKEN no definido. Genera uno con `python -c \"import secrets; print(secrets.token_urlsafe(24))\"` "
+        "y exportalo antes de arrancar. El servidor no iniciará sin token."
+    )
+
+_security = HTTPBearer(auto_error=False)
+
+
+def verify_token(
+    creds: Optional[HTTPAuthorizationCredentials] = Depends(_security),
+) -> str:
+    """Valida el token Bearer en cada peticion. Aplica a TODOS los endpoints."""
+    if not AUTH_TOKEN:
+        raise HTTPException(status_code=503, detail="Servidor sin token configurado")
+    provided = creds.credentials if creds else None
+    # secrets.compare_digest evata timing attacks y nunca lanza con None.
+    if not provided or not secrets.compare_digest(provided, AUTH_TOKEN):
+        raise HTTPException(status_code=401, detail="Token invalido o ausente")
+    return AUTH_TOKEN
+
+
+app = FastAPI(title="AC Midea Control", dependencies=[Depends(verify_token)])
+
 _device = None
-_device_lock = asyncio.Lock()
+_device_lock = None  # asyncio.Lock se crea en startup (necesita loop)
 
 MODE_NAMES = {
     1: "AUTO", 2: "FRÍO", 3: "SECO",
@@ -32,12 +74,41 @@ FAN_NAMES = {
 }
 
 
+def _load_creds() -> dict:
+    """Carga credenciales del AC: primero variables de entorno, luego JSON."""
+    env = {k: os.environ.get(k) for k in ("AC_IP", "AC_PORT", "AC_DEVICE_ID", "AC_TOKEN", "AC_KEY")}
+    if all(env.values()):
+        _LOGGER.info("Credenciales AC cargadas desde variables de entorno")
+        return {
+            "ip": env["AC_IP"],
+            "port": int(env["AC_PORT"]),
+            "device_id": int(env["AC_DEVICE_ID"]),
+            "token": env["AC_TOKEN"],
+            "key": env["AC_KEY"],
+        }
+    try:
+        with open(CREDS_PATH) as f:
+            _LOGGER.info("Credenciales AC cargadas desde %s", CREDS_PATH)
+            return json.load(f)
+    except FileNotFoundError:
+        raise RuntimeError(
+            f"No se encontraron credenciales del AC. Definelas por variables de entorno "
+            f"(AC_IP, AC_PORT, AC_DEVICE_ID, AC_TOKEN, AC_KEY) o crea {CREDS_PATH}"
+        )
+
+
+@app.on_event("startup")
+async def _startup():
+    global _device_lock
+    import asyncio
+    _device_lock = asyncio.Lock()
+
+
 async def _get_device() -> AirConditioner:
     global _device
     async with _device_lock:
         if _device is None:
-            with open(CREDS_PATH) as f:
-                creds = json.load(f)
+            creds = _load_creds()
             _device = AirConditioner(
                 ip=creds["ip"],
                 device_id=creds["device_id"],
@@ -83,589 +154,10 @@ def _status_dict(dev):
     }
 
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def index():
-    html = """<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>AC Midea Control</title>
-<style>
-  :root {
-    --bg: #0f0f1a;
-    --card: #1a1a2e;
-    --card2: #16213e;
-    --accent: #00d4ff;
-    --accent2: #7c3aed;
-    --green: #22c55e;
-    --red: #ef4444;
-    --text: #e2e8f0;
-    --dim: #64748b;
-    --glass: rgba(255,255,255,0.04);
-    --radius: 20px;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 16px;
-    background-image: radial-gradient(ellipse at 50% 0%, #1a1a3e 0%, transparent 60%);
-  }
-  .container { width: 100%; max-width: 400px; }
-
-  /* HEADER */
-  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .header h1 { font-size: 16px; font-weight: 600; color: var(--dim); letter-spacing: 1px; text-transform: uppercase; }
-  .header .status-led {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 12px; font-weight: 500; color: var(--dim);
-  }
-  .led { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-  .led.on { background: var(--green); box-shadow: 0 0 8px var(--green); }
-  .led.off { background: var(--dim); }
-
-  /* TEMP DIAL */
-  .dial-wrap {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 32px 24px 24px;
-    text-align: center;
-    margin-bottom: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-  .dial-wrap::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 200%;
-    height: 100%;
-    background: radial-gradient(ellipse at center, rgba(0,212,255,0.06) 0%, transparent 60%);
-    pointer-events: none;
-  }
-  .temp-indoor {
-    font-size: 56px;
-    font-weight: 300;
-    line-height: 1;
-    color: var(--text);
-    position: relative;
-  }
-  .temp-indoor .deg { font-size: 24px; color: var(--accent); vertical-align: super; }
-  .temp-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
-
-  /* TEMP TARGET ROW */
-  .target-row {
-    display: flex; justify-content: center; align-items: center; gap: 16px;
-    margin-top: 16px;
-  }
-  .target-row .target-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; }
-  .target-row .target-val { font-size: 24px; font-weight: 600; color: var(--accent); }
-  .target-row .target-val.off { color: var(--dim); }
-  .target-arrows { display: flex; gap: 4px; }
-  .arrow-btn {
-    width: 36px; height: 36px; border-radius: 50%;
-    border: none; background: var(--glass); color: var(--accent);
-    font-size: 18px; cursor: pointer; transition: .2s;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .arrow-btn:hover { background: rgba(0,212,255,0.12); }
-  .arrow-btn:active { transform: scale(0.9); }
-  .arrow-btn:disabled { opacity: 0.3; cursor: default; }
-
-  /* GRID CARDS */
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-  .info-card {
-    background: var(--card);
-    border-radius: 16px;
-    padding: 14px;
-    text-align: center;
-  }
-  .info-card .icon { font-size: 18px; margin-bottom: 4px; }
-  .info-card .val { font-size: 18px; font-weight: 600; }
-  .info-card .lbl { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
-
-  /* MIC */
-  .mic-wrap { display: flex; justify-content: center; margin: 8px 0; }
-  .mic-btn {
-    background: var(--card);
-    border: 1px solid var(--dim);
-    color: var(--text);
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    font-size: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: .25s;
-    position: relative;
-  }
-  .mic-btn:hover { border-color: var(--accent); }
-  .mic-btn.listening {
-    border-color: var(--green);
-    box-shadow: 0 0 14px var(--green);
-    animation: mPulse 1s infinite;
-  }
-  .mic-btn .mic-tip {
-    display: none;
-    position: absolute;
-    top: 48px; left: 50%;
-    transform: translateX(-50%);
-    background: var(--card2);
-    border: 1px solid var(--dim);
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    white-space: nowrap;
-    color: var(--text);
-    z-index: 10;
-  }
-  .mic-btn.listening .mic-tip { display: block; }
-  .mic-cmd {
-    text-align: center;
-    font-size: 12px;
-    color: var(--accent);
-    min-height: 18px;
-    margin: 4px 0 8px;
-    transition: .2s;
-  }
-  @keyframes mPulse {
-    0%,100% { box-shadow: 0 0 8px var(--green); }
-    50% { box-shadow: 0 0 22px var(--green); }
-  }
-
-  /* SECTION */
-  .section-label {
-    font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px;
-    margin: 12px 0 8px; display: flex; align-items: center; gap: 6px;
-  }
-
-  /* MODE GRID */
-  .mode-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 8px; }
-  .mode-btn {
-    background: var(--card); border: 2px solid transparent;
-    border-radius: 14px; padding: 10px 4px;
-    text-align: center; cursor: pointer; transition: .2s;
-    font-size: 11px; font-weight: 600; color: var(--dim);
-  }
-  .mode-btn .mode-icon { font-size: 20px; display: block; margin-bottom: 4px; }
-  .mode-btn:hover { border-color: rgba(0,212,255,0.3); }
-  .mode-btn.active {
-    border-color: var(--accent); color: var(--accent);
-    background: rgba(0,212,255,0.08);
-    box-shadow: 0 0 20px rgba(0,212,255,0.1);
-  }
-
-  /* FAN GRID */
-  .fan-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 16px; }
-  .fan-btn {
-    background: var(--card); border: 2px solid transparent;
-    border-radius: 12px; padding: 8px 2px;
-    text-align: center; cursor: pointer; transition: .2s;
-    font-size: 10px; font-weight: 600; color: var(--dim);
-  }
-  .fan-btn .fan-icon { font-size: 16px; display: block; margin-bottom: 2px; }
-  .fan-btn:hover { border-color: rgba(124,58,237,0.3); }
-  .fan-btn.active {
-    border-color: var(--accent2); color: var(--accent2);
-    background: rgba(124,58,237,0.08);
-  }
-
-  /* POWER BUTTONS */
-  .power-row { display: flex; gap: 10px; margin-bottom: 0; }
-  .power-btn {
-    flex: 1; padding: 14px; border: none; border-radius: 14px;
-    font-size: 14px; font-weight: 600; cursor: pointer; transition: .2s;
-  }
-  .power-btn:active { transform: scale(0.97); }
-  .power-btn.on { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
-  .power-btn.off { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
-  .power-btn.on.active { box-shadow: 0 0 24px rgba(34,197,94,0.3); }
-
-  /* STATUS BAR */
-  .status-bar {
-    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;
-    font-size: 11px; color: var(--dim);
-  }
-  .status-bar span { background: var(--glass); padding: 4px 10px; border-radius: 20px; }
-
-  .error {
-    color: var(--red); text-align: center; font-size: 12px;
-    padding: 8px; margin-top: 8px; display: none;
-    background: rgba(239,68,68,0.1); border-radius: 10px;
-  }
-
-  @media (max-width: 380px) {
-    .temp-indoor { font-size: 44px; }
-    .mode-grid { gap: 4px; }
-    .fan-grid { gap: 4px; }
-  }
-</style>
-</head>
-<body>
-<div class="container">
-  <div class="header">
-    <h1>AC Midea</h1>
-    <div class="status-led">
-      <span class="led" id="power-led"></span>
-      <span id="power-text">APAGADO</span>
-    </div>
-  </div>
-
-  <!-- VOICE -->
-  <div class="mic-wrap">
-    <button class="mic-btn" id="mic-btn" title="Control por voz">
-      🎤
-      <span class="mic-tip" id="mic-tip">Escuchando...</span>
-    </button>
-  </div>
-  <div class="mic-cmd" id="mic-cmd"></div>
-
-  <!-- TEMP DIAL -->
-  <div class="dial-wrap">
-    <div class="temp-indoor" id="indoor-temp">--<span class="deg">°</span></div>
-    <div class="temp-label">Temperatura ambiente</div>
-    <div class="target-row">
-      <span class="target-label">Objetivo</span>
-      <div class="target-arrows">
-        <button class="arrow-btn" id="temp-down">−</button>
-      </div>
-      <span class="target-val" id="target-temp">--°</span>
-      <div class="target-arrows">
-        <button class="arrow-btn" id="temp-up">+</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- INFO CARDS -->
-  <div class="grid-2">
-    <div class="info-card">
-      <div class="icon">🌡️</div>
-      <div class="val" id="info-mode">--</div>
-      <div class="lbl">Modo</div>
-    </div>
-    <div class="info-card">
-      <div class="icon">💨</div>
-      <div class="val" id="info-fan">--</div>
-      <div class="lbl">Ventilador</div>
-    </div>
-    <div class="info-card">
-      <div class="icon">🪟</div>
-      <div class="val" id="info-outdoor">--°</div>
-      <div class="lbl">Exterior</div>
-    </div>
-    <div class="info-card">
-      <div class="icon">⚡</div>
-      <div class="val" id="info-swing">--</div>
-      <div class="lbl">Oscilación</div>
-    </div>
-  </div>
-
-  <div class="error" id="error"></div>
-
-  <!-- CONSUMPTION -->
-  <div class="grid-2">
-    <div class="info-card">
-      <div class="icon">⚡</div>
-      <div class="val" id="info-total-energy">--</div>
-      <div class="lbl">Consumo total</div>
-    </div>
-    <div class="info-card">
-      <div class="icon">🔌</div>
-      <div class="val" id="info-power-now">--</div>
-      <div class="lbl">Potencia ahora</div>
-    </div>
-  </div>
-
-  <!-- MODE -->
-  <div class="section-label">Modo</div>
-  <div class="mode-grid" id="mode-grid">
-    <div class="mode-btn" data-mode="AUTO"><span class="mode-icon">🔄</span>AUTO</div>
-    <div class="mode-btn" data-mode="FRÍO"><span class="mode-icon">❄️</span>FRÍO</div>
-    <div class="mode-btn" data-mode="SECO"><span class="mode-icon">💧</span>SECO</div>
-    <div class="mode-btn" data-mode="CALOR"><span class="mode-icon">🔥</span>CALOR</div>
-    <div class="mode-btn" data-mode="VENT"><span class="mode-icon">🌀</span>VENT</div>
-  </div>
-
-  <!-- FAN -->
-  <div class="section-label">Ventilador</div>
-  <div class="fan-grid" id="fan-grid">
-    <div class="fan-btn" data-fan="20"><span class="fan-icon">🍃</span>SILEN</div>
-    <div class="fan-btn" data-fan="40"><span class="fan-icon">🌿</span>BAJO</div>
-    <div class="fan-btn" data-fan="60"><span class="fan-icon">🌬️</span>MEDIO</div>
-    <div class="fan-btn" data-fan="80"><span class="fan-icon">💨</span>ALTO</div>
-    <div class="fan-btn" data-fan="100"><span class="fan-icon">🌪️</span>MÁX</div>
-    <div class="fan-btn" data-fan="102"><span class="fan-icon">🤖</span>AUTO</div>
-  </div>
-
-  <!-- POWER -->
-  <div class="power-row">
-    <button class="power-btn on" id="btn-on">Encender</button>
-    <button class="power-btn off" id="btn-off">Apagar</button>
-  </div>
-
-  <!-- STATUS -->
-  <div class="status-bar" id="status-bar"></div>
-</div>
-<script>
-let state = {};
-
-async function api(method, params={}) {
-  const url = '/api/' + method + '?' + new URLSearchParams(params);
-  try {
-    const r = await fetch(url);
-    const data = await r.json();
-    if (data.error) {
-      document.getElementById('error').textContent = data.error;
-      document.getElementById('error').style.display = 'block';
-    } else {
-      document.getElementById('error').style.display = 'none';
-    }
-    if (data.status) updateUI(data.status);
-    return data;
-  } catch(e) {
-    document.getElementById('error').textContent = 'Error de conexión';
-    document.getElementById('error').style.display = 'block';
-  }
-}
-
-function updateUI(s) {
-  state = s;
-  const on = s.power;
-
-  // LED
-  const led = document.getElementById('power-led');
-  led.className = 'led ' + (on ? 'on' : 'off');
-  document.getElementById('power-text').textContent = on ? 'ENCENDIDO' : 'APAGADO';
-
-  // Indoor temp
-  const it = s.indoor_temp;
-  document.getElementById('indoor-temp').innerHTML = (it != null ? it.toFixed(1) : '--') + '<span class="deg">°</span>';
-
-  // Target temp
-  const tt = s.target_temp;
-  const ttv = document.getElementById('target-temp');
-  ttv.textContent = (tt != null ? tt + '\u00b0' : '--\u00b0');
-  ttv.className = 'target-val' + (on ? '' : ' off');
-
-  // Info cards
-  document.getElementById('info-mode').textContent = on ? (s.mode || '--') : '--';
-  document.getElementById('info-fan').textContent = on ? (s.fan_speed || '--') : '--';
-  document.getElementById('info-outdoor').textContent = (s.outdoor_temp != null ? s.outdoor_temp.toFixed(1) + '\u00b0' : '--\u00b0');
-  document.getElementById('info-swing').textContent = on ? (s.swing || '--') : '--';
-
-  // Energy
-  document.getElementById('info-total-energy').textContent = (s.total_energy != null ? s.total_energy.toFixed(1) + ' kWh' : '--');
-  document.getElementById('info-power-now').textContent = (s.real_time_power != null && s.real_time_power > 0 ? s.real_time_power.toFixed(0) + ' W' : 'N/A');
-
-  // Mode buttons
-  document.querySelectorAll('.mode-btn').forEach(b => {
-    b.classList.toggle('active', on && b.dataset.mode === s.mode);
-  });
-
-  // Fan buttons
-  document.querySelectorAll('.fan-btn').forEach(b => {
-    b.classList.toggle('active', on && parseInt(b.dataset.fan) === s.fan_speed_code);
-  });
-
-  // Power buttons
-  document.getElementById('btn-on').classList.toggle('active', on);
-  document.getElementById('btn-off').classList.toggle('active', !on);
-
-  // Status bar
-  const bar = document.getElementById('status-bar');
-  bar.innerHTML = '';
-  if (s.eco) bar.innerHTML += '<span>ECO</span>';
-  if (s.turbo) bar.innerHTML += '<span>TURBO</span>';
-  if (s.error) bar.innerHTML += '<span style="color:var(--red)">ERROR: ' + s.error + '</span>';
-}
-
-// HANDLERS
-document.querySelectorAll('.mode-btn').forEach(b => {
-  b.addEventListener('click', () => api('mode', {mode: b.dataset.mode}));
-});
-document.querySelectorAll('.fan-btn').forEach(b => {
-  b.addEventListener('click', () => api('fan', {speed: b.dataset.fan}));
-});
-document.getElementById('btn-on').addEventListener('click', () => api('power', {on: true}));
-document.getElementById('btn-off').addEventListener('click', () => api('power', {on: false}));
-
-// Temp arrows
-document.getElementById('temp-up').addEventListener('click', () => {
-  const cur = state.target_temp || 24;
-  if (cur < 30) api('temp', {temp: cur + 1});
-});
-document.getElementById('temp-down').addEventListener('click', () => {
-  const cur = state.target_temp || 24;
-  if (cur > 16) api('temp', {temp: cur - 1});
-});
-
-// VOICE CONTROL
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null;
-let micListening = false;
-let micTimer = null;
-
-function micLog(msg) {
-  document.getElementById('mic-cmd').textContent = msg;
-}
-function micClear() {
-  if (micTimer) { clearTimeout(micTimer); micTimer = null; }
-  micListening = false;
-  document.getElementById('mic-btn').classList.remove('listening');
-}
-
-function startMic() {
-  if (!SpeechRecognition) {
-    micLog('❌ El navegador no soporta control por voz');
-    return;
-  }
-  if (recognition) recognition.abort();
-  recognition = new SpeechRecognition();
-  recognition.lang = 'es-ES';
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 3;
-
-  recognition.onstart = () => {
-    micListening = true;
-    document.getElementById('mic-btn').classList.add('listening');
-    micLog('🎤 Escuchando...');
-    // Timeout: auto-stop after 10s of silence
-    micTimer = setTimeout(() => {
-      if (micListening) {
-        micLog('⏱️ Tiempo agotado, tocá 🎤 para hablar');
-        micClear();
-      }
-    }, 10000);
-  };
-  recognition.onerror = (e) => {
-    if (e.error === 'not-allowed') {
-      micLog('❌ Micrófono bloqueado - permitilo en el navegador');
-    } else if (e.error === 'no-speech') {
-      micLog('🔇 No escuché nada, intentá de nuevo');
-    } else if (e.error !== 'aborted') {
-      micLog('❌ Error: ' + e.error);
-    }
-    micClear();
-  };
-  recognition.onend = () => {
-    micClear();
-  };
-  recognition.onresult = (e) => {
-    const cmds = [];
-    for (let i = 0; i < e.results[0].length; i++) {
-      cmds.push(e.results[0][i].transcript.toLowerCase().trim());
-    }
-    const transcript = cmds[0];
-    micClear();
-    micLog('🗣️ "' + transcript + '"');
-    processVoice(transcript, cmds);
-    // Restart listening after a short delay so user can speak again
-    setTimeout(() => {
-      if (document.getElementById('mic-btn').classList.contains('listening')) return;
-      // Don't auto-restart, user clicks mic again
-    }, 100);
-  };
-  try {
-    recognition.start();
-  } catch(e) {
-    micLog('❌ Error al iniciar: ' + e.message);
-    micClear();
-  }
-}
-
-function stopMic() {
-  if (recognition) { try { recognition.abort(); } catch(e) {} recognition = null; }
-  micClear();
-}
-
-document.getElementById('mic-btn').addEventListener('click', () => {
-  if (micListening) { stopMic(); micLog('🎤 Micrófono apagado'); }
-  else startMic();
-});
-
-const MODE_MAP = {
-  'frío': 'FRÍO', 'frio': 'FRÍO', 'calor': 'CALOR',
-  'seco': 'SECO', 'auto': 'AUTO', 'ventilador': 'VENT',
-  'vent': 'VENT', 'solo ventilador': 'VENT', 'solo vent': 'VENT'
-};
-const FAN_MAP = {
-  'silencioso': '20', 'silen': '20', 'bajo': '40', 'medio': '60',
-  'alto': '80', 'máximo': '100', 'maximo': '100', 'max': '100',
-  'auto': '102'
-};
-
-function processVoice(text, allTexts) {
-  // Power on/off
-  if (text.includes('encender') || text.includes('prender') || text.includes('activa')) {
-    api('power', {on: true});
-    return;
-  }
-  if (text.includes('apagar') || text.includes('desactiv') || text.includes('apaga')) {
-    api('power', {on: false});
-    return;
-  }
-
-  // Temperature
-  const nums = text.match(/\d+/g);
-  if (text.includes('temperatura') && nums) {
-    const t = parseInt(nums[0]);
-    if (t >= 16 && t <= 30) { api('temp', {temp: t}); return; }
-  }
-  if ((text.includes('subir') || text.includes('aument') || text.includes('más calor')) && state.target_temp) {
-    if (state.target_temp < 30) api('temp', {temp: state.target_temp + 1});
-    return;
-  }
-  if ((text.includes('bajar') || text.includes('reduc') || text.includes('más frío')) && state.target_temp) {
-    if (state.target_temp > 16) api('temp', {temp: state.target_temp - 1});
-    return;
-  }
-  // "a X grados"
-  if (nums && text.includes('grado')) {
-    const t = parseInt(nums[0]);
-    if (t >= 16 && t <= 30) { api('temp', {temp: t}); return; }
-  }
-
-  // Mode
-  if (text.includes('modo')) {
-    for (const [key, val] of Object.entries(MODE_MAP)) {
-      if (text.includes(key)) { api('mode', {mode: val}); return; }
-    }
-  }
-
-  // Fan
-  if (text.includes('ventilador') || text.includes('velocidad')) {
-    for (const [key, val] of Object.entries(FAN_MAP)) {
-      if (text.includes(key)) { api('fan', {speed: val}); return; }
-    }
-  }
-
-  // Direct shortcuts
-  for (const [key, val] of Object.entries(MODE_MAP)) {
-    if (text === key || text.includes('pon ' + key) || text.includes('ponga ' + key)) {
-      api('mode', {mode: val}); return;
-    }
-  }
-
-  document.getElementById('mic-cmd').textContent += ' ❌ No entendí';
-}
-
-// Init
-api('status');
-setInterval(() => api('status'), 10000);
-</script>
-</body>
-</html>"""
-    return HTMLResponse(html)
+    """Devuelve la UI. El JS pide el token al usuario y lo envia como Bearer."""
+    return HTMLResponse(TEMPLATE_PATH.read_text(encoding="utf-8"))
 
 
 @app.get("/api/status")
@@ -677,7 +169,7 @@ async def api_status():
         return {"error": str(e)}
 
 
-@app.get("/api/power")
+@app.post("/api/power")
 async def api_power(on: bool = Query(...)):
     try:
         dev = await _get_device()
@@ -689,7 +181,7 @@ async def api_power(on: bool = Query(...)):
         return {"error": str(e)}
 
 
-@app.get("/api/mode")
+@app.post("/api/mode")
 async def api_mode(mode: str = Query(...)):
     try:
         code = MODE_VALUES.get(mode.upper())
@@ -704,7 +196,7 @@ async def api_mode(mode: str = Query(...)):
         return {"error": str(e)}
 
 
-@app.get("/api/temp")
+@app.post("/api/temp")
 async def api_temp(temp: float = Query(...)):
     try:
         if temp < 16 or temp > 30:
@@ -718,7 +210,7 @@ async def api_temp(temp: float = Query(...)):
         return {"error": str(e)}
 
 
-@app.get("/api/fan")
+@app.post("/api/fan")
 async def api_fan(speed: int = Query(...)):
     try:
         valid = [20, 40, 60, 80, 100, 102]
@@ -734,7 +226,14 @@ async def api_fan(speed: int = Query(...)):
 
 
 if __name__ == "__main__":
-    import uvicorn
+    if not AUTH_TOKEN:
+        raise SystemExit(
+            "AC_WEB_TOKEN no definido. Genera uno con:\n"
+            '  python -c "import secrets; print(secrets.token_urlsafe(24))"\n'
+            "y exportalo antes de arrancar."
+        )
+    host = os.environ.get("AC_WEB_HOST", "127.0.0.1")
+    port = int(os.environ.get("AC_WEB_PORT", "8080"))
     print("=== AC Midea Web Control ===")
-    print("Abrir http://localhost:8080 en el navegador")
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    print(f"Escuchando en http://{host}:{port} (requiere token Bearer)")
+    uvicorn.run(app, host=host, port=port)

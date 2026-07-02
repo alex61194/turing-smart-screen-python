@@ -31,6 +31,16 @@ GPUtil~=1.4.0; python_version < "3.12"
 # GPUtil is broken for Python 3.12+ and not maintained anymore: fetch it from a fork where it is fixed
 GPUtil @ git+https://github.com/mathoudebine/gputil.git@1.4.1-py3.13 ; python_version >= "3.12"
 
+# Midea AC control (local LAN) - usado por ac_web.py y sensors_custom.py
+msmart-ng~=0.7.0; sys_platform=="win32"
+
+# Web interface for AC control (ac_web.py)
+fastapi~=0.115.0; sys_platform=="win32"
+uvicorn~=0.34.0; sys_platform=="win32"
+
+# FusionSolar scraping (sensors_custom.py) - requiere además: playwright install
+playwright~=1.49.0; sys_platform=="win32"
+
 # Following packages are for AMD GPU on Linux
 pyamdgpuinfo~=2.1.6; sys_platform=="linux" and python_version <= "3.12"
 # For Python > 3.12, you need to build install pyamdgpuinfo manually: see https://github.com/mathoudebine/turing-smart-screen-python/wiki/Troubleshooting#linux--macos-no-supported-gpu-found-with-an-amd-gpu-and-python--311

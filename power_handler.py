@@ -1,11 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import subprocess
+"""Power handler: arranca/para el monitor segun suspend/resume/lock/shutdown.
+
+Proceso independiente que gestiona el ciclo de vida de main.py ante eventos
+del sistema (suspender, reanudar, bloqueo de sesion, apagado).
+"""
+import logging
 import os
+import subprocess
 import sys
+import threading
 import time
 import ctypes
 from ctypes import wintypes, Structure, sizeof, byref
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 MAIN_DIR = Path(__file__).resolve().parent
@@ -28,15 +36,16 @@ WTS_SESSION_UNLOCK = 0x8
 
 monitor_proc = None
 
+# Logger con rotacion: max 500 KB x 3 ficheros (antes crecia sin limite).
+_logger = logging.getLogger("power_handler")
+_logger.setLevel(logging.INFO)
+_handler = RotatingFileHandler(LOG_FILE, maxBytes=500000, backupCount=3, encoding="utf-8")
+_handler.setFormatter(logging.Formatter("[%(asctime)s] %(message)s", "%Y-%m-%d %H:%M:%S"))
+_logger.addHandler(_handler)
+
 
 def log(msg):
-    ts = time.strftime('%Y-%m-%d %H:%M:%S')
-    line = f"[{ts}] {msg}"
-    try:
-        with open(LOG_FILE, "a", encoding="utf-8") as f:
-            f.write(line + "\n")
-    except:
-        pass
+    _logger.info(msg)
 
 
 def signal_shutdown():
@@ -52,7 +61,7 @@ def clear_shutdown_signal():
     try:
         if os.path.exists(SHUTDOWN_SIGNAL_FILE):
             os.remove(SHUTDOWN_SIGNAL_FILE)
-    except:
+    except Exception:
         pass
 
 
@@ -69,6 +78,11 @@ def start_monitor():
         stderr=subprocess.DEVNULL
     )
     log(f"Monitor started PID={monitor_proc.pid}")
+
+
+def _start_monitor_async():
+    """Arranca el monitor en un hilo para no bloquear el message loop."""
+    threading.Thread(target=start_monitor, daemon=True).start()
 
 
 def stop_monitor_graceful():
@@ -89,11 +103,11 @@ def stop_monitor_graceful():
     try:
         subprocess.run(["taskkill", "/f", "/pid", str(pid)],
                        capture_output=True, timeout=5)
-    except:
+    except Exception:
         pass
     try:
         monitor_proc.wait(timeout=3)
-    except:
+    except Exception:
         pass
     clear_shutdown_signal()
     log(f"Monitor killed PID={pid}")
@@ -109,11 +123,11 @@ def stop_monitor_force():
     try:
         subprocess.run(["taskkill", "/f", "/pid", str(pid)],
                        capture_output=True, timeout=5)
-    except:
+    except Exception:
         pass
     try:
         monitor_proc.wait(timeout=3)
-    except:
+    except Exception:
         pass
     clear_shutdown_signal()
     log(f"Monitor force killed PID={pid}")
@@ -154,8 +168,7 @@ def wnd_proc(hwnd, msg, wparam, lparam):
             stop_monitor_graceful()
         elif lparam == WTS_SESSION_UNLOCK:
             log("SESSION UNLOCKED - starting monitor")
-            time.sleep(2)
-            start_monitor()
+            _start_monitor_async()  # no bloquea el message loop
         return 0
     if msg == WM_POWERBROADCAST:
         if wparam == PBT_APMSUSPEND:
@@ -167,8 +180,7 @@ def wnd_proc(hwnd, msg, wparam, lparam):
                         PBT_APMRESUMECRITICAL):
             log("SYSTEM RESUMING - starting monitor")
             clear_shutdown_signal()
-            time.sleep(3)
-            start_monitor()
+            _start_monitor_async()  # no bloquea el message loop
             return 1
         return 1
     if msg == WM_QUERYENDSESSION:

@@ -9,7 +9,7 @@ config:
   # Theme to use (located in res/themes)
   # Use the name of the folder as value
   # Choose a theme made for your screen size (see DISPLAY_SIZE inside theme.yaml)
-  THEME: RoomStatus
+  THEME: cyberpunk
 
   # Hardware sensors reading
   # Choose the appropriate method for reading your hardware sensors:
@@ -17,13 +17,13 @@ config:
   # - LHM            use LibreHardwareMonitor library to read hardware sensors (Windows only - NEEDS ADMIN RIGHTS)
   # - STUB / STATIC  use random/static data instead of real hardware sensors
   # - AUTO           use the best method based on your OS: Windows OS will use LHM, other OS will use Python libraries
-  HW_SENSORS: AUTO
+  HW_SENSORS: AUTO     # AUTO, LHM, MAHM (MSI Afterburner, no admin), PYTHON, STUB, STATIC
 
   # Network interfaces
   # Linux/MacOS interfaces are named "eth0", "wlan0", "wlp1s0", "enp2s0"...
   # For Windows use the interfaces pretty name: "Ethernet 2", "Wi-Fi", ...
   # Leave the fields empty if the card does not exist on your setup
-  ETH: Ethernet 4 # Ethernet Card
+  ETH: Ethernet # Ethernet Card
   WLO: '' # Wi-Fi Card
 
   # CPU fan
@@ -39,15 +39,15 @@ config:
   # Weather data with OpenWeatherMap API. Only useful if you want to use a theme that displays it
 
   # OpenWeatherMap API KEY. Can be obtained by creating a free account on https://home.openweathermap.org/users/sign_up.
-  # You need to subscribe to the 3.0 OneCallAPI that has 1000 free daily calls
-  WEATHER_API_KEY: 3a467e23b43d092093cf7c71b4c687d8
+  # You need to subscribe to the 3.0 OneCallAPI that has 1000 free calls/day
+  WEATHER_API_KEY: YOUR_OPENWEATHERMAP_API_KEY
   # Location from which to display the weather. Use for example https://www.latlong.net/ to get latitude/longitude
-  WEATHER_LATITUDE: '45.75'
-  WEATHER_LONGITUDE: '4.85'
+  WEATHER_LATITUDE: '40.4168'
+  WEATHER_LONGITUDE: '-3.7038'
   # Units used to display temperatures (metric - °C, imperial - °F, standard - °K)
   WEATHER_UNITS: metric
   # Language is used by the API. Find more here https://openweathermap.org/api/one-call-3#multi
-  WEATHER_LANGUAGE: es
+  WEATHER_LANGUAGE: sp
 
 display:
   # Display revision:

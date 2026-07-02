@@ -263,6 +263,7 @@ class Gpu(sensors.Gpu):
         used_mem = math.nan
         total_mem = math.nan
         temp = math.nan
+        temp_fallback = math.nan
         for sensor in gpu_to_use.Sensors:
             if sensor.SensorType == Hardware.SensorType.Load and str(sensor.Name).startswith(
                     "GPU Core") and sensor.Value is not None:
@@ -283,6 +284,13 @@ class Gpu(sensors.Gpu):
             elif sensor.SensorType == Hardware.SensorType.Temperature and str(sensor.Name).startswith(
                     "GPU Core") and sensor.Value is not None:
                 temp = float(sensor.Value)
+            elif sensor.SensorType == Hardware.SensorType.Temperature and math.isnan(
+                    temp_fallback) and sensor.Value is not None:
+                # Any other temperature sensor on this GPU (e.g. Hot Spot, Memory Junction)
+                # used only if "GPU Core" itself hasn't reported a value this cycle.
+                temp_fallback = float(sensor.Value)
+        if math.isnan(temp) and not math.isnan(temp_fallback):
+            temp = temp_fallback
         return load, (used_mem / total_mem * 100.0), used_mem, total_mem, temp
 
     @classmethod

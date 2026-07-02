@@ -29,10 +29,11 @@ locale.setlocale(locale.LC_ALL, '')
 logging.basicConfig(  # format='%(asctime)s [%(levelname)s] %(message)s in %(pathname)s:%(lineno)d',
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        RotatingFileHandler("log.log", maxBytes=1000000, backupCount=0),  # Log in textfile max 1MB
+        RotatingFileHandler("log.log", maxBytes=1000000, backupCount=3),  # Log in textfile max 1MB x 3
         logging.StreamHandler()  # Log also in console
     ],
     datefmt='%x %X')
 
 logger = logging.getLogger('turing')
-logger.setLevel(logging.DEBUG)  # Lowest log level : print all messages
+# DEBUG genera ~600 KB/dia de ruido en produccion. Subir a DEBUG solo para diagnostico.
+logger.setLevel(logging.INFO)
