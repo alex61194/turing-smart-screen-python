@@ -383,8 +383,8 @@ class MideaACTargetTemp(_MideaACBase):
 
 class MideaACMode(_MideaACBase):
     _MODE_NAMES = {
-        1: "AUTO", 2: "FRÍO", 3: "SECO",
-        4: "CALOR", 5: "VENT", 6: "S.DRY",
+         1: "AUTO", 2: "FRÍO", 3: "SECO",
+        4: "CALOR", 5: "VENTILADOR", 6: "S.DRY",
     }
 
     def as_numeric(self) -> float:

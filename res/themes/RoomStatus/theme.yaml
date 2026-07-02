@@ -104,7 +104,7 @@ static_text:
   RAM_LABEL:
     TEXT: "RAM"
     X: 20
-    Y: 296
+    Y: 300
     FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
     FONT_SIZE: 10
     FONT_COLOR: 98, 114, 164
@@ -310,7 +310,7 @@ STATS:
         SHOW: True
         SHOW_UNIT: True
         X: 70
-        Y: 296
+        Y: 300
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 11
         FONT_COLOR: 241, 250, 140
@@ -319,7 +319,7 @@ STATS:
         SHOW: True
         SHOW_UNIT: True
         X: 130
-        Y: 296
+        Y: 300
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 11
         FONT_COLOR: 255, 184, 108
@@ -328,7 +328,7 @@ STATS:
         SHOW: True
         SHOW_UNIT: True
         X: 200
-        Y: 296
+        Y: 300
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 11
         FONT_COLOR: 241, 250, 140
@@ -499,7 +499,7 @@ STATS:
     MideaACMode:
       TEXT:
         SHOW: True
-        X: 100
+        X: 80
         Y: 400
         WIDTH: 50
         HEIGHT: 14
@@ -510,7 +510,7 @@ STATS:
     MideaACFanSpeed:
       TEXT:
         SHOW: True
-        X: 195
+        X: 210
         Y: 410
         WIDTH: 50
         HEIGHT: 14
@@ -521,7 +521,7 @@ STATS:
     MideaACTargetTemp:
       TEXT:
         SHOW: True
-        X: 100
+        X: 80
         Y: 420
         WIDTH: 50
         HEIGHT: 13
@@ -555,7 +555,7 @@ STATS:
       TEXT:
         SHOW: True
         X: 110
-        Y: 434
+        Y: 439
         WIDTH: 100
         HEIGHT: 13
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
