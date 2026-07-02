@@ -38,7 +38,7 @@ import library.sensors.sensors as sensors
 from library.log import logger
 
 try:
-    from library.sensors.rtss_osd import read_fps as _read_rtss_fps
+    from library.rtss_osd import read_fps as _read_rtss_fps
 except ImportError:
     def _read_rtss_fps() -> int:
         return 0
@@ -162,7 +162,7 @@ _CPU_CLOCK = ["CPU clock", "CPU Core Clock"]
 _CPU_POWER = ["CPU power"]
 _GPU_USAGE = ["GPU usage", "GPU1 usage"]
 _GPU_TEMP = ["GPU temperature", "GPU1 temperature"]
-_GPU_MEM_PCT = ["Memory usage", "GPU1 memory usage"]
+_GPU_MEM_PCT = ["fb usage", "Memory usage", "GPU1 memory usage"]
 _GPU_CORE_CLOCK = ["Core clock", "GPU1 core clock"]
 _GPU_POWER = ["Power", "GPU1 power", "Power consumption %"]
 _GPU_FAN = ["Fan speed", "GPU1 fan speed"]
@@ -268,7 +268,11 @@ class Memory(sensors.Memory):
     @staticmethod
     def virtual_percent() -> float:
         sources, _ = _read_sources()
-        return _find(sources, _RAM_USAGE)
+        mb = _find(sources, _RAM_USAGE)
+        if not math.isnan(mb):
+            total_mb = psutil.virtual_memory().total / (1024 * 1024)
+            return mb / total_mb * 100.0 if total_mb > 0 else math.nan
+        return math.nan
 
     @staticmethod
     def virtual_used() -> int:  # bytes
