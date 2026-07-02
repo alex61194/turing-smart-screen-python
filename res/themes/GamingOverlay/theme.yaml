@@ -2,7 +2,7 @@ author: GamingOverlay — Dracula minimal v3
 display:
   DISPLAY_SIZE: 3.5"
   DISPLAY_ORIENTATION: portrait
-  DISPLAY_RGB_LED: 189, 147, 249
+  DISPLAY_RGB_LED: 189, 117, 249
 static_images:
   BACKGROUND:
     PATH: background.png
@@ -15,57 +15,57 @@ static_text:
     TEXT: FPS
     X: 20
     Y: 8
-    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
     FONT_SIZE: 9
-    FONT_COLOR: 98, 114, 164
+    FONT_COLOR: 98, 111, 164
     BACKGROUND_IMAGE: background.png
   GPU_LABEL:
     TEXT: GPU
     X: 32
     Y: 138
-    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
     FONT_SIZE: 10
-    FONT_COLOR: 98, 114, 164
+    FONT_COLOR: 98, 111, 164
     BACKGROUND_IMAGE: background.png
   VRAM_LABEL:
     TEXT: VRAM
     X: 32
-    Y: 186
-    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    Y: 190
+    FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
     FONT_SIZE: 9
-    FONT_COLOR: 98, 114, 164
+    FONT_COLOR: 98, 111, 164
     BACKGROUND_IMAGE: background.png
   CPU_LABEL:
     TEXT: CPU
     X: 32
     Y: 252
-    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
     FONT_SIZE: 10
-    FONT_COLOR: 98, 114, 164
+    FONT_COLOR: 98, 111, 164
     BACKGROUND_IMAGE: background.png
   RAM_LABEL:
     TEXT: RAM
     X: 32
     Y: 332
-    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
     FONT_SIZE: 10
-    FONT_COLOR: 98, 114, 164
+    FONT_COLOR: 98, 111, 164
     BACKGROUND_IMAGE: background.png
   NET_DOWN_LABEL:
     TEXT: DESC
     X: 32
     Y: 412
-    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
     FONT_SIZE: 9
-    FONT_COLOR: 98, 114, 164
+    FONT_COLOR: 98, 111, 164
     BACKGROUND_IMAGE: background.png
   NET_UP_LABEL:
     TEXT: SUB
     X: 32
     Y: 432
-    FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+    FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
     FONT_SIZE: 9
-    FONT_COLOR: 98, 114, 164
+    FONT_COLOR: 98, 111, 164
     BACKGROUND_IMAGE: background.png
 STATS:
   GPU:
@@ -74,18 +74,18 @@ STATS:
       TEXT:
         SHOW: true
         SHOW_UNIT: true
-        X: 32
-        Y: 154
-        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
-        FONT_SIZE: 14
+        X: 60
+        Y: 140
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
         FONT_COLOR: 139, 233, 253
         BACKGROUND_IMAGE: background.png
       GRAPH:
         SHOW: true
         X: 28
-        Y: 178
+        Y: 160
         WIDTH: 264
-        HEIGHT: 8
+        HEIGHT: 10
         MIN_VALUE: 0
         MAX_VALUE: 100
         BAR_COLOR: 139, 233, 253
@@ -100,9 +100,9 @@ STATS:
         SHOW: true
         SHOW_UNIT: true
         X: 110
-        Y: 154
-        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
-        FONT_SIZE: 14
+        Y: 139
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
         FONT_COLOR: 80, 250, 123
         BACKGROUND_IMAGE: background.png
       GRAPH:
@@ -115,9 +115,9 @@ STATS:
       TEXT:
         SHOW: true
         SHOW_UNIT: false
-        X: 160
-        Y: 26
-        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
+        X: 140
+        Y: 20
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 72
         FONT_COLOR: 139, 233, 253
         ANCHOR: mt
@@ -132,9 +132,9 @@ STATS:
         X: 20
         Y: 85
         WIDTH: 280
-        HEIGHT: 28
+        HEIGHT: 30
         MIN_VALUE: 0
-        MAX_VALUE: 165
+        MAX_VALUE: 180
         HISTORY_SIZE: 60
         AUTOSCALE: true
         LINE_COLOR: 139, 233, 253
@@ -148,8 +148,8 @@ STATS:
       TEXT:
         SHOW: true
         SHOW_UNIT: true
-        X: 200
-        Y: 200
+        X: 170
+        Y: 190
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 11
         FONT_COLOR: 139, 233, 253
@@ -158,9 +158,9 @@ STATS:
       GRAPH:
         SHOW: true
         X: 28
-        Y: 216
+        Y: 205
         WIDTH: 264
-        HEIGHT: 8
+        HEIGHT: 10
         MIN_VALUE: 0
         MAX_VALUE: 100
         BAR_COLOR: 139, 233, 253
@@ -181,8 +181,8 @@ STATS:
       TEXT:
         SHOW: true
         SHOW_UNIT: true
-        X: 28
-        Y: 200
+        X: 60
+        Y: 190
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 11
         FONT_COLOR: 139, 233, 253
@@ -191,8 +191,8 @@ STATS:
       TEXT:
         SHOW: true
         SHOW_UNIT: true
-        X: 100
-        Y: 200
+        X: 120
+        Y: 190
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 11
         FONT_COLOR: 139, 233, 253
@@ -209,14 +209,17 @@ STATS:
     FREQUENCY:
       TEXT:
         SHOW: false
+        SHOW_UNIT: true
+        X: 150
+        Y: 135
     POWER:
       TEXT:
         SHOW: true
         SHOW_UNIT: true
-        X: 175
-        Y: 154
+        X: 150
+        Y: 140
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
-        FONT_SIZE: 14
+        FONT_SIZE: 11
         FONT_COLOR: 139, 233, 253
         BACKGROUND_IMAGE: background.png
       LINE_GRAPH:
@@ -228,18 +231,18 @@ STATS:
       TEXT:
         SHOW: true
         SHOW_UNIT: true
-        X: 32
-        Y: 268
-        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
-        FONT_SIZE: 14
+        X: 60
+        Y: 252
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
         FONT_COLOR: 139, 233, 253
         BACKGROUND_IMAGE: background.png
       GRAPH:
         SHOW: true
         X: 28
-        Y: 292
+        Y: 278
         WIDTH: 264
-        HEIGHT: 8
+        HEIGHT: 10
         MIN_VALUE: 0
         MAX_VALUE: 100
         BAR_COLOR: 139, 233, 253
@@ -255,9 +258,9 @@ STATS:
         SHOW: true
         SHOW_UNIT: true
         X: 110
-        Y: 268
-        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
-        FONT_SIZE: 14
+        Y: 252
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
         FONT_COLOR: 80, 250, 123
         BACKGROUND_IMAGE: background.png
       GRAPH:
@@ -272,7 +275,7 @@ STATS:
         SHOW: true
         SHOW_UNIT: true
         X: 175
-        Y: 268
+        Y: 252
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 12
         FONT_COLOR: 139, 233, 253
@@ -288,8 +291,8 @@ STATS:
       TEXT:
         SHOW: true
         SHOW_UNIT: true
-        X: 250
-        Y: 268
+        X: 230
+        Y: 252
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 12
         FONT_COLOR: 139, 233, 253
@@ -324,29 +327,29 @@ STATS:
         SHOW_UNIT: true
         X: 32
         Y: 348
-        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
-        FONT_SIZE: 14
-        FONT_COLOR: 241, 250, 140
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 241, 250, 110
         BACKGROUND_IMAGE: background.png
       FREE:
         SHOW: false
       TOTAL:
         SHOW: true
         SHOW_UNIT: true
-        X: 140
+        X: 110
         Y: 348
-        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
-        FONT_SIZE: 14
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
         FONT_COLOR: 255, 184, 108
         BACKGROUND_IMAGE: background.png
       PERCENT_TEXT:
         SHOW: true
         SHOW_UNIT: true
-        X: 232
+        X: 150
         Y: 348
-        FONT: jetbrains-mono/JetBrainsMono-Bold.ttf
-        FONT_SIZE: 14
-        FONT_COLOR: 241, 250, 140
+        FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
+        FONT_SIZE: 11
+        FONT_COLOR: 241, 250, 110
         BACKGROUND_IMAGE: background.png
         ALIGN: right
         WIDTH: 60
@@ -355,7 +358,7 @@ STATS:
       GRAPH:
         SHOW: true
         X: 28
-        Y: 372
+        Y: 367
         WIDTH: 264
         HEIGHT: 8
         MIN_VALUE: 0
@@ -426,7 +429,7 @@ STATS:
         Y: 474
         FONT: jetbrains-mono/JetBrainsMono-Regular.ttf
         FONT_SIZE: 12
-        FONT_COLOR: 98, 114, 164
+        FONT_COLOR: 98, 111, 164
         BACKGROUND_IMAGE: background.png
         ANCHOR: rb
         FORMAT: H:mm
