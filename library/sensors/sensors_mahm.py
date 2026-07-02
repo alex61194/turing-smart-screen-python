@@ -143,8 +143,12 @@ def _read_sources() -> Tuple[dict, dict]:
 
 def _find(sources: dict, candidates) -> float:
     """Returns the first matching source's value, trying each candidate name
-    (case-insensitive substring match), or NaN if none is found/checked in
-    Afterburner's Monitoring settings."""
+    (case-insensitive exact match first, then substring), or NaN if none is found."""
+    for cand in candidates:
+        cand_l = cand.lower()
+        for name, entry in sources.items():
+            if cand_l == name:
+                return float(entry["data"])
     for cand in candidates:
         cand_l = cand.lower()
         for name, entry in sources.items():
@@ -155,8 +159,12 @@ def _find(sources: dict, candidates) -> float:
 
 def _find_gpu(sources: dict, candidates) -> float:
     """Like _find but only matches sources whose gpu field is a real GPU index
-    (0, 1, ...), not the sentinel 0xFFFFFFFF used for non-GPU entries.
-    This avoids e.g. "power" substring-matching "cpu power" instead of "power"."""
+    (0, 1, ...), not the sentinel 0xFFFFFFFF used for non-GPU entries."""
+    for cand in candidates:
+        cand_l = cand.lower()
+        for name, entry in sources.items():
+            if entry["gpu"] != 0xFFFFFFFF and cand_l == name:
+                return float(entry["data"])
     for cand in candidates:
         cand_l = cand.lower()
         for name, entry in sources.items():
