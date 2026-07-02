@@ -114,6 +114,8 @@ import json
 import logging
 import os
 import threading
+import time
+import requests
 from collections import deque
 
 _AC_LOGGER = logging.getLogger(__name__)
@@ -194,7 +196,6 @@ class _MideaACMonitor:
         return cls._instance
 
     def _update_cache(self, device):
-        import time as _time
         with self._cache_lock:
             power_on = device.power_state
             self._cache["power_state"] = power_on
@@ -219,7 +220,7 @@ class _MideaACMonitor:
             # calculamos la potencia instantanea del intervalo y la
             # promediamos con las ultimas N lecturas de tick para
             # obtener un valor estable que converge a la media real.
-            now = _time.time()
+            now = time.time()
             if not power_on:
                 self._cache["derived_power_w"] = 0.0
                 self._power_w = 0.0
@@ -282,9 +283,9 @@ class _MideaACMonitor:
         try:
             await device.authenticate(token=creds["token"], key=creds["key"])
             device.enable_energy_usage_requests = True
+            self._ready.set()
             await device.refresh()
             self._update_cache(device)
-            self._ready.set()
             _AC_LOGGER.info("Midea AC authenticated: indoor=%.1fC, total=%.1fkWh",
                             device.indoor_temperature,
                             device.get_total_energy_usage() or 0)
@@ -300,7 +301,7 @@ class _MideaACMonitor:
             except Exception as e:
                 _AC_LOGGER.warning("Midea AC refresh error: %s", e)
 
-            await asyncio.sleep(10)
+            await asyncio.sleep(5)
 
     def _run_loop(self):
         self._loop = asyncio.new_event_loop()
@@ -522,6 +523,7 @@ class _FusionSolarMonitor:
         }
         self._cache_lock = threading.Lock()
         self._ready = threading.Event()
+        self._station_dn = None
 
     @classmethod
     def get_instance(cls):
@@ -535,14 +537,114 @@ class _FusionSolarMonitor:
         with self._cache_lock:
             return self._cache.get(key)
 
-    def _run(self):
-        try:
-            from playwright.sync_api import sync_playwright
-        except ImportError:
-            _AC_LOGGER.error("playwright not installed")
-            self._ready.set()
-            return
+    def _update_cache_from_kpi(self, data):
+        with self._cache_lock:
+            kw = float(data.get("currentPower") or 0)
+            self._cache["generation_w"] = kw * 1000
+            self._cache["generation_today_kwh"] = float(data.get("dailyEnergy") or 0)
+            self._cache["generation_total_kwh"] = float(data.get("cumulativeEnergy") or 0)
+            self._cache["consumption_today_kwh"] = float(data.get("dailyUseEnergy") or 0)
 
+    def _update_cache_from_eflow(self, data):
+        flow_data = data["flow"]
+        load_w = 0
+        pv_w = 0
+        for node in flow_data.get("nodes", []):
+            nid = node.get("id")
+            val = node.get("value")
+            if nid == "5" and val is not None:
+                load_w = float(val) * 1000
+            elif nid == "0" and val is not None:
+                pv_w = float(val) * 1000
+        with self._cache_lock:
+            self._cache["consumption_w"] = load_w
+            self._cache["surplus_w"] = pv_w - load_w
+
+    def _try_requests_login(self, username, password):
+        """Intenta login via requests HTTP directo. Devuelve (session, station_dn) o (None, None)."""
+        base = "https://eu5.fusionsolar.huawei.com"
+
+        session = requests.Session()
+        session.headers.update({
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Content-Type": "application/json",
+        })
+
+        # GET inicial para obtener cookies
+        session.get(base, timeout=15)
+
+        # Intentar login via API interna
+        endpoints = [
+            "/rest/pvms/web/account/v1/login",
+            "/rest/pvms/web/account/v1/loginByTenant",
+            "/thirdData/login",
+        ]
+        logged_in = False
+        for ep in endpoints:
+            try:
+                if "thirdData" in ep:
+                    body = {"userName": username, "systemCode": password}
+                else:
+                    body = {"userName": username, "password": password}
+                r = session.post(f"{base}{ep}", json=body, timeout=10)
+                if r.status_code == 200:
+                    j = r.json()
+                    if j.get("success") or "login" not in r.url.lower():
+                        logged_in = True
+                        _AC_LOGGER.info("FusionSolar login requests OK via %s", ep)
+                        break
+            except Exception:
+                continue
+
+        if not logged_in:
+            return None, None
+
+        # Obtener station list
+        try:
+            r = session.post(f"{base}/rest/pvms/web/station/v1/station/station-list", json={}, timeout=10)
+            j = r.json()
+            if j.get("success") and j.get("data", {}).get("list"):
+                dn = j["data"]["list"][0]["dn"]
+                _AC_LOGGER.info("FusionSolar station DN (requests): %s", dn)
+                return session, dn
+        except Exception as e:
+            _AC_LOGGER.warning("FusionSolar station-list via requests falló: %s", e)
+
+        return session, None
+
+    def _poll_requests(self, session, station_dn):
+        """Bucle de polling via requests. Devuelve False si hay que reconectar."""
+        base = "https://eu5.fusionsolar.huawei.com"
+
+        try:
+            r = session.post(
+                f"{base}/rest/pvms/web/station/v1/overview/station-real-kpi",
+                params={"stationDn": station_dn, "_": int(time.time() * 1000)},
+                json={}, timeout=10
+            )
+            resp = r.json()
+            if resp.get("success") and resp.get("data"):
+                self._update_cache_from_kpi(resp["data"])
+            else:
+                return False
+        except Exception:
+            return False
+
+        try:
+            r = session.post(
+                f"{base}/rest/pvms/web/station/v3/overview/energy-flow",
+                params={"stationDn": station_dn, "featureId": "aifc", "_": int(time.time() * 1000)},
+                json={}, timeout=10
+            )
+            eflow = r.json()
+            if eflow.get("success") and eflow.get("data"):
+                self._update_cache_from_eflow(eflow["data"])
+        except Exception:
+            pass
+
+        return True
+
+    def _run(self):
         creds = _load_fusion_creds()
         if not creds:
             _AC_LOGGER.warning("FusionSolar credentials not found (define env vars "
@@ -559,12 +661,29 @@ class _FusionSolarMonitor:
 
         _AC_LOGGER.info("Starting FusionSolar monitor...")
 
+        # Intentar primero con requests (rápido, ~2-3s)
+        session, station_dn = self._try_requests_login(username, password)
+        if session is not None and station_dn:
+            _AC_LOGGER.info("FusionSolar: usando requests HTTP (rápido)")
+            self._station_dn = station_dn
+            self._ready.set()
+            # Primer poll inmediato
+            self._poll_requests(session, station_dn)
+            while self._running:
+                if not self._poll_requests(session, station_dn):
+                    _AC_LOGGER.warning("FusionSolar requests poll falló, reintentando login...")
+                    break
+                time.sleep(30)
+            session.close()
+
+        # Fallback: Playwright si requests no funciona
+        _AC_LOGGER.info("FusionSolar: requests no disponible, usando Playwright...")
         while self._running:
             browser = None
             pw = None
             try:
+                from playwright.sync_api import sync_playwright
                 pw = sync_playwright().start()
-                # Ocultamos rastro de automatización básico pasando un User-Agent común
                 browser = pw.chromium.launch(headless=True, args=["--no-sandbox", "--disable-blink-features=AutomationControlled"])
                 context = browser.new_context(
                     viewport={"width": 1280, "height": 800}, 
@@ -572,7 +691,7 @@ class _FusionSolarMonitor:
                     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                 )
                 page = context.new_page()
-                station_dn = None
+                station_dn = self._station_dn
 
                 def _capture_dn(response):
                     nonlocal station_dn
@@ -586,29 +705,26 @@ class _FusionSolarMonitor:
                             _AC_LOGGER.info("FusionSolar station DN: %s", station_dn)
 
                 page.on("response", _capture_dn)
-
-                # Ir a la web e iniciar sesión
                 page.goto("https://eu5.fusionsolar.huawei.com", timeout=45000)
                 page.wait_for_load_state("networkidle", timeout=20000)
 
                 inputs = page.locator("input.right_name_textfield").all()
                 if len(inputs) < 2:
                     raise Exception("No se encontraron los campos de Login en el portal")
-                    
                 inputs[0].fill(username)
                 inputs[1].fill(password)
                 page.wait_for_timeout(1000)
                 page.locator("div.loginBtn:has-text('Iniciar sesión')").first.click()
-                page.wait_for_timeout(12000)
+                page.wait_for_timeout(5000)
                 page.wait_for_load_state("networkidle", timeout=25000)
 
                 if "login" in page.url.lower():
                     _AC_LOGGER.error("FusionSolar login fallido en credenciales")
                     self._ready.set()
-                    break # Detener si las credenciales son erróneas
+                    break
 
-                _AC_LOGGER.info("FusionSolar login exitoso, obteniendo estación...")
-                page.wait_for_timeout(8000)
+                _AC_LOGGER.info("FusionSolar login exitoso (Playwright), obteniendo estación...")
+                page.wait_for_timeout(3000)
 
                 if not station_dn:
                     try:
@@ -627,17 +743,13 @@ class _FusionSolarMonitor:
                     except Exception as e:
                         _AC_LOGGER.warning("station-list API falló de inicio: %s", e)
 
-                # Si logramos autenticar la primera vez, el monitor está listo para entregar datos antiguos/caché
+                self._station_dn = station_dn
                 self._ready.set()
 
-                # Bucle de consulta interno (mantenimiento de sesión viva)
-                # Durará hasta que ocurra un fallo de fetch o desconexión, forzando un ciclo limpio
                 while self._running:
                     if not station_dn:
-                        _AC_LOGGER.warning("Esperando Station DN válido... reintentando sesión completa.")
                         break
 
-                    # Consulta 1: KPI Principal
                     resp = page.evaluate("""
                         async (dn) => {
                             const r = await fetch(
@@ -650,18 +762,10 @@ class _FusionSolarMonitor:
                     """, station_dn)
 
                     if resp and resp.get("success") and resp.get("data"):
-                        data = resp["data"]
-                        with self._cache_lock:
-                            kw = float(data.get("currentPower") or 0)
-                            self._cache["generation_w"] = kw * 1000
-                            self._cache["generation_today_kwh"] = float(data.get("dailyEnergy") or 0)
-                            self._cache["generation_total_kwh"] = float(data.get("cumulativeEnergy") or 0)
-                            self._cache["consumption_today_kwh"] = float(data.get("dailyUseEnergy") or 0)
+                        self._update_cache_from_kpi(resp["data"])
                     else:
-                        _AC_LOGGER.warning("FusionSolar KPI devuelto con error de estructura, reiniciando sesión.")
                         break
 
-                    # Consulta 2: Flujo de Energía (Inversor / Casa / Excedentes)
                     try:
                         eflow = page.evaluate("""
                             async (dn) => {
@@ -674,32 +778,17 @@ class _FusionSolarMonitor:
                             }
                         """, station_dn)
                         if eflow and eflow.get("success") and eflow.get("data"):
-                            flow_data = eflow["data"]["flow"]
-                            load_w = 0
-                            pv_w = 0
-                            for node in flow_data.get("nodes", []):
-                                nid = node.get("id")
-                                val = node.get("value")
-                                if nid == "5" and val is not None:
-                                    load_w = float(val) * 1000
-                                elif nid == "0" and val is not None:
-                                    pv_w = float(val) * 1000
-                            with self._cache_lock:
-                                self._cache["consumption_w"] = load_w
-                                self._cache["surplus_w"] = pv_w - load_w
+                            self._update_cache_from_eflow(eflow["data"])
                     except Exception:
-                        pass # Si falla el flujo de energía puntualmente, no tiramos la sesión entera abajo
+                        pass
 
-                    # Espera de 60 segundos entre lecturas estándar
-                    import time as _time
-                    _time.sleep(60)
+                    time.sleep(30)
 
             except Exception as e:
                 _AC_LOGGER.error("Error crítico en monitor FusionSolar: %s. Reabriendo instancia...", e)
                 if not self._ready.is_set():
                     self._ready.set()
             finally:
-                # Cierre absoluto y limpio de Playwright para evitar procesos zombis en RAM
                 try:
                     if browser:
                         browser.close()
@@ -707,10 +796,8 @@ class _FusionSolarMonitor:
                         pw.stop()
                 except Exception:
                     pass
-            
-            # Pequeña pausa de seguridad antes de levantar el nuevo navegador limpio (evita spam si cae internet)
-            import time as _time
-            _time.sleep(10)
+
+            time.sleep(10)
 
         _AC_LOGGER.info("FusionSolar monitor stopped")
 
