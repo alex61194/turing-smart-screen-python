@@ -206,7 +206,10 @@ class _MideaACMonitor:
             total = device.get_total_energy_usage()
             self._cache["total_energy"] = total
             self._cache["current_energy"] = device.get_current_energy_usage()
-            self._cache["real_time_power"] = device.get_real_time_power_usage()
+            rt_power = device.get_real_time_power_usage()
+            _AC_LOGGER.info("AC real_time_power raw: %s (total_energy=%s, current_energy=%s)",
+                            rt_power, total, device.get_current_energy_usage())
+            self._cache["real_time_power"] = rt_power
 
             # --- Potencia derivada (W) a partir del contador acumulado ---
             # El contador del AC avanza en saltos discretos (~10 Wh), asi que
